@@ -10,6 +10,13 @@ client = MongoClient("mongodb://db:27017")
 db = client.aNewDB
 patients = db["Patients"]
 
+def generateReturnJson(status, msg):
+    retJson = {
+        "status": status,
+        "msg": msg
+    }
+    return retJson
+
 def UserExists(email):
     if patients.find({"Email":email}).count() == 0:
         return False
@@ -29,10 +36,7 @@ class Register(Resource):
         gender = postedData["gender"]
 
         if UserExists(email):
-            retJson = {
-                'status':400,
-                'msg': 'User already exists'
-            }
+            retJson = generateReturnJson(400, "User already exists")
             return jsonify(retJson)
 
         hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
@@ -46,12 +50,45 @@ class Register(Resource):
             "Age":age,
             "Gender":gender
         })
-
-        retJson = {
-            "status": 200,
-            "msg": "Account successfully created"
-        }
+        retJson = generateReturnJson(200, "Account successfully created")
         return jsonify(retJson)
+
+def verifyCredentials(email, password):
+    if not UserExists(email):
+        return generateReturnJson(400, "Email doesn't exist"), True
+
+    correct_pw = verifyPw(email, password)
+
+    if not correct_pw:
+        return generateReturnJson(400, "The password you entered is incorrect"), True
+
+    return None, False
+
+def verifyPw(email, password):
+    if not UserExists(email):
+        return False
+
+    hashed_pw = patients.find({
+        "Email":email
+    })[0]["Password"]
+
+    if bcrypt.hashpw(password.encode('utf8'), hashed_pw) == hashed_pw:
+        return True
+    else:
+        return False
+
+class Login(Resource):
+    def post(self):
+        postedData = request.get_json()
+
+        email = postedData["email"]
+        password = postedData["password"]
+
+        retJson, error = verifyCredentials(email, password)
+        if error:
+            return jsonify(retJson)
+        else:
+            retJson = generateReturnJson(200, "Login successful")
 
 api.add_resource(Register, "/register")
 api.add_resource(Login, "/login")
