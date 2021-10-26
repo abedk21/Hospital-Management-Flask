@@ -1,4 +1,5 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template, url_for
+from flask_bootstrap import Bootstrap
 from flask_restful import Api, Resource
 from pymongo import MongoClient
 import bcrypt
@@ -22,6 +23,10 @@ def UserExists(email):
         return False
     else:
         return True
+
+class Index(Resource):
+    def get(self):
+       return render_template('index.html') 
 
 class Register(Resource):
     def post(self):
@@ -47,8 +52,8 @@ class Register(Resource):
             "First_Name": first_name,
             "Last_Name": last_name,
             "Phone_Number": phone_number,
-            "Age":age,
-            "Gender":gender
+            "Age": age,
+            "Gender": gender
         })
         retJson = generateReturnJson(200, "Account successfully created")
         return jsonify(retJson)
@@ -78,6 +83,8 @@ def verifyPw(email, password):
         return False
 
 class Login(Resource):
+    def get(self):
+        return render_template('login.html')
     def post(self):
         postedData = request.get_json()
 
@@ -89,7 +96,9 @@ class Login(Resource):
             return jsonify(retJson)
         else:
             retJson = generateReturnJson(200, "Login successful")
+            return jsonify(retJson)
 
+api.add_resource(Index, "/")
 api.add_resource(Register, "/register")
 api.add_resource(Login, "/login")
 
