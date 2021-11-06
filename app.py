@@ -6,6 +6,7 @@ from flask_restful import Api, Resource
 from flask import make_response, render_template
 import bcrypt
 from werkzeug.utils import secure_filename
+from uuid import uuid4
 import os
 
 app = Flask(__name__)
@@ -18,14 +19,17 @@ app.config['MONGODB_SETTINGS'] = {
 }
 initialize_db(app)
 
-UPLOAD_FOLDER = 'prescriptions'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+UPLOAD_FOLDER_PRESCRIPTIONS = 'prescriptions'
+UPLOAD_FOLDER_MEDICALTESTS = 'medicaltests'
+app.config['UPLOAD_FOLDER_PRESCRIPTIONS'] = UPLOAD_FOLDER_PRESCRIPTIONS
+app.config['UPLOAD_FOLDER_MEDICALTESTS'] = UPLOAD_FOLDER_MEDICALTESTS
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
    
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
    
 def allowed_file(filename):
  return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def generateReturnJson(status, msg):
     retJson = {
@@ -125,10 +129,17 @@ class Prescriptions(Resource):
     def post(self):
         file = request.files['file']
         patientID = request.form['patientID']
-        filename = secure_filename(file.filename)
+        doctorID = request.form['doctorID']
+        filename = uuid4().__str__()
         if file and allowed_file(file.filename):
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            prescription = Prescription(patientID=patientID, filename=file.filename)
+            path = os.path.join(app.config['UPLOAD_FOLDER_PRESCRIPTIONS'], patientID, doctorID)
+            try:
+                os.makedirs(path, exist_ok = True)
+                print("Directory '%s' created successfully" % path)
+            except OSError as error:
+                print("Directory '%s' can not be created" % path)
+            file.save(os.path.join(path, filename))
+            prescription = Prescription(patientID=patientID, doctorID=doctorID, filename=filename)
             prescription.save()
             return redirect('/')
         else:
@@ -137,14 +148,59 @@ class Prescriptions(Resource):
 
 class DownloadPrescription(Resource):
     def get(self, filename):
-        path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        patientID = request.form['patientID']
+        doctorID = request.form['doctorID']
+        path = os.path.join(app.config['UPLOAD_FOLDER_PRESCRIPTIONS'], patientID, doctorID, filename)
         return send_file(path)
+
+class MedicalTests(Resource):
+    def get(self):
+        email = request.form['email']
+        user = User.objects(email=email).first()
+        id = str(user.id)
+        medicaltests = MedicalTests.objects(patientID=id).to_json()
+        return medicaltests, 200
+
+    def post(self):
+        file = request.files['file']
+        patientID = request.form['patientID']
+        labopID = request.form['labopID']
+        filename = uuid4().__str__()
+        if file and allowed_file(file.filename):
+            path = os.path.join(app.config['UPLOAD_FOLDER_MEDICALTESTS'], patientID, labopID)
+            try:
+                os.makedirs(path, exist_ok = True)
+                print("Directory '%s' created successfully" % path)
+            except OSError as error:
+                print("Directory '%s' can not be created" % path)
+            file.save(os.path.join(path, filename))
+            medicaltests = MedicalTests(patientID=patientID, labopID=labopID, filename=filename)
+            medicaltests.save()
+            return redirect('/')
+        else:
+            flash('Invalid Upload only txt, pdf, png, jpg, jpeg, gif') 
+        return redirect('/')
+
+class DownloadMedicalTest(Resource):
+    def get(self, filename):
+        patientID = request.form['patientID']
+        labopID = request.form['labopID']
+        path = os.path.join(app.config['UPLOAD_FOLDER_MEDICALTESTS'], patientID, labopID, filename)
+        return send_file(path)
+
+# class Patient(Resource):
+#     def get(self):
+#         patients = User.objects
+#         return send_file(path)
 
 api.add_resource(Index, "/")
 api.add_resource(Register, "/register")
 api.add_resource(Login, "/login")
 api.add_resource(Prescriptions, "/prescription")
 api.add_resource(DownloadPrescription, "/prescription/<filename>")
+api.add_resource(MedicalTests, "/medicaltest")
+api.add_resource(DownloadMedicalTest, "/medicaltest/<filename>")
+# api.add_resource(Patient, "/patient")
 
 if __name__ == "__main__":
     app.run(debug=True)

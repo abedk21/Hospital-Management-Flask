@@ -13,9 +13,17 @@ class User(gj.Document):
     age = db.IntField(required=True)
     gender = db.StringField(required=True)
     role = db.StringField(required=True)
+    specialty = db.StringField()
+    patients = db.ListField()
     date_created = DateTimeField(default=datetime.utcnow)
 
 class Prescription(gj.Document):
+    patientID = db.StringField(required=True)
+    doctorID = db.StringField(required=True)
+    filename = db.StringField(required=True)
+    date_created = DateTimeField(default=datetime.utcnow)
+
+class MedicalTest(gj.Document):
     patientID = db.StringField(required=True)
     filename = db.StringField(required=True)
     date_created = DateTimeField(default=datetime.utcnow)
