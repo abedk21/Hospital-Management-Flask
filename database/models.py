@@ -15,19 +15,7 @@ class User(gj.Document):
     role = db.StringField(required=True)
     date_created = DateTimeField(default=datetime.utcnow)
 
-    # def json(self):
-    #     user = {
-    #         "email": self.email,
-    #         "first_name": self.firstName,
-    #         "last_name": self.lastName,
-    #         "phone_number": self.phoneNumber,
-    #         "age": self.age,
-    #         "gender": self.gender,
-    #         "role": self.role
-    #     }
-    #     return json.dumps(user)
-
-    # meta = {
-    #     "indexes": ["email"],
-    #     "ordering": ["date_created"]
-    # }
+class Prescription(gj.Document):
+    patientID = db.StringField(required=True)
+    filename = db.StringField(required=True)
+    date_created = DateTimeField(default=datetime.utcnow)
