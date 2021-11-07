@@ -30,6 +30,9 @@ ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 def allowed_file(filename):
  return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def make_unique(string):
+    ident = uuid4().__str__()
+    return f"{ident}-{string}"
 
 def generateReturnJson(status, msg):
     retJson = {
@@ -132,14 +135,16 @@ class Prescriptions(Resource):
         doctorID = request.form['doctorID']
         filename = uuid4().__str__()
         if file and allowed_file(file.filename):
+            original_filename = secure_filename(file.filename)
+            unique_filename = make_unique(original_filename)
             path = os.path.join(app.config['UPLOAD_FOLDER_PRESCRIPTIONS'], patientID, doctorID)
             try:
                 os.makedirs(path, exist_ok = True)
                 print("Directory '%s' created successfully" % path)
             except OSError as error:
                 print("Directory '%s' can not be created" % path)
-            file.save(os.path.join(path, filename))
-            prescription = Prescription(patientID=patientID, doctorID=doctorID, filename=filename)
+            file.save(os.path.join(path, unique_filename))
+            prescription = Prescription(patientID=patientID, doctorID=doctorID, filename=unique_filename)
             prescription.save()
             return redirect('/')
         else:
@@ -167,14 +172,16 @@ class MedicalTests(Resource):
         labopID = request.form['labopID']
         filename = uuid4().__str__()
         if file and allowed_file(file.filename):
+            original_filename = secure_filename(file.filename)
+            unique_filename = make_unique(original_filename)
             path = os.path.join(app.config['UPLOAD_FOLDER_MEDICALTESTS'], patientID, labopID)
             try:
                 os.makedirs(path, exist_ok = True)
                 print("Directory '%s' created successfully" % path)
             except OSError as error:
                 print("Directory '%s' can not be created" % path)
-            file.save(os.path.join(path, filename))
-            medicaltests = MedicalTests(patientID=patientID, labopID=labopID, filename=filename)
+            file.save(os.path.join(path, unique_filename))
+            medicaltests = MedicalTests(patientID=patientID, labopID=labopID, filename=unique_filename)
             medicaltests.save()
             return redirect('/')
         else:
