@@ -118,8 +118,14 @@ class Login(Resource):
         if error:
             return retJson, 400
         else:
-            retJson = generateReturnJson(200, "Login successful")
-            return retJson
+            role = User.objects(email=email).first().role
+            headers = {'Content-Type': 'text/html'}
+            if role == "doctor":
+                return make_response(render_template('docdash.html'),200,headers)
+            elif role == "patient":
+                return make_response(render_template('patdash.html'),200,headers)
+            else:
+                return make_response(render_template('techdash.html'),200,headers)
 
 class Prescriptions(Resource):
     def get(self):
