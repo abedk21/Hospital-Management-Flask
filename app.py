@@ -1,13 +1,16 @@
 from database.db import initialize_db
 from database.models import *
-from flask import Flask, Response, request, render_template, url_for, send_file, flash, redirect
+from flask import Flask, Response, request, render_template, url_for, send_file, flash, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_restful import Api, Resource
-from flask import make_response, render_template
+from flask import make_response
+from flask_login import login_user, current_user, logout_user, login_required
 import bcrypt
 from werkzeug.utils import secure_filename
 from uuid import uuid4
 import os
+from flask_bcrypt import Bcrypt
+from flask_login import LoginManager
 
 app = Flask(__name__)
 api = Api(app)
@@ -18,6 +21,11 @@ app.config['MONGODB_SETTINGS'] = {
     'port': 27017
 }
 initialize_db(app)
+app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
+bcrypt=Bcrypt(app)
+login_manager=LoginManager(app)
+login_manager.login_view='login'
+login_manager.login_message_category='info'
 
 UPLOAD_FOLDER_PRESCRIPTIONS = 'prescriptions'
 UPLOAD_FOLDER_MEDICALTESTS = 'medicaltests'
@@ -48,17 +56,14 @@ def UserExists(email):
     else:
         return True
 
-class Index(Resource):
-    def get(self):
-        headers = {'Content-Type': 'text/html'}
-        return make_response(render_template('index.html'),200,headers)
+@app.route("/")
+def index():
+    headers = {'Content-Type': 'text/html'}
+    return make_response(render_template('index.html'),200,headers)
 
-class Register(Resource):
-    def get(self):
-        headers = {'Content-Type': 'text/html'}
-        return make_response(render_template('signup.html'),200,headers)
-
-    def post(self):
+@app.route("/register", methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
         email = request.form['email']
         if UserExists(email):
             return {'msg': "User already exists"}, 400
@@ -76,11 +81,13 @@ class Register(Resource):
         }
         
         user = User(**newBody).save()
-        redirect('/login')
+        return redirect(url_for('login'))
         # headers = {'Content-Type': 'text/html'}
         # return make_response(render_template('login.html'),200,headers)
         # id = user.id
         # return {'id': str(id), 'msg': "Account successfully created"}, 200
+    headers = {'Content-Type': 'text/html'}
+    return make_response(render_template('signup.html'),200,headers)
 
 def verifyCredentials(email, password):
     if not UserExists(email):
@@ -104,38 +111,71 @@ def verifyPw(email, password):
     else:
         return False
 
-class Login(Resource):
-    def get(self):
+@login_manager.user_loader
+def load_user(user):
+    return User.get(user)
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        if current_user.is_authenticated:
+            email = current_user.username
+            role = User.objects(email=email).first().role
+            if role == "doctor":
+                return redirect(url_for("docdash"))
+            elif role == "patient":
+                return redirect(url_for("patdash"))
+            else:
+                return redirect(url_for("techdash"))
         headers = {'Content-Type': 'text/html'}
         return make_response(render_template('login.html'),200,headers)
 
-    def post(self):
-        body = request.get_json()
+    if request.method == 'POST':  
         email = request.form['email']
         password = request.form["password"]
-
         retJson, error = verifyCredentials(email, password)
         if error:
             return retJson, 400
         else:
-            role = User.objects(email=email).first().role
-            headers = {'Content-Type': 'text/html'}
+            user = User.objects(email=email).first()
+            login_user(user)
+            role = user.role
             if role == "doctor":
-                return make_response(render_template('docdash.html'),200,headers)
+                return redirect(url_for("docdash"))
             elif role == "patient":
-                return make_response(render_template('patdash.html'),200,headers)
+                return redirect(url_for("patdash"))
             else:
-                return make_response(render_template('techdash.html'),200,headers)
+                return redirect(url_for("techdash"))     
 
-class Prescriptions(Resource):
-    def get(self):
+@app.route("/docdash")
+@login_required
+def docdash():
+    headers = {'Content-Type': 'text/html'}
+    return make_response(render_template('doctors/docdash.html'),200,headers)
+
+@app.route("/patdash")
+@login_required
+def patdash():
+    headers = {'Content-Type': 'text/html'}
+    return make_response(render_template('patdash.html'),200,headers)
+
+@app.route("/techdash")
+@login_required
+def techdash():
+    headers = {'Content-Type': 'text/html'}
+    return make_response(render_template('techdash.html'),200,headers)
+
+@app.route("/prescription", methods=['GET', 'POST'])
+@login_required
+def prescription():
+    if request.method == 'GET':
         email = request.form['email']
         user = User.objects(email=email).first()
         id = str(user.id)
         prescriptions = Prescription.objects(patientID=id).to_json()
         return prescriptions, 200
 
-    def post(self):
+    if request.method == 'POST':
         file = request.files['file']
         patientID = request.form['patientID']
         doctorID = request.form['doctorID']
@@ -152,27 +192,30 @@ class Prescriptions(Resource):
             file.save(os.path.join(path, unique_filename))
             prescription = Prescription(patientID=patientID, doctorID=doctorID, filename=unique_filename)
             prescription.save()
-            return redirect('/')
+            return redirect(url_for('home'))
         else:
             flash('Invalid Upload only txt, pdf, png, jpg, jpeg, gif') 
         return redirect('/') 
 
-class DownloadPrescription(Resource):
-    def get(self, filename):
-        patientID = request.form['patientID']
-        doctorID = request.form['doctorID']
-        path = os.path.join(app.config['UPLOAD_FOLDER_PRESCRIPTIONS'], patientID, doctorID, filename)
-        return send_file(path)
+@app.route("/prescription/<filename>", methods=['GET'])
+@login_required
+def downloadPrescription(filename):
+    patientID = request.form['patientID']
+    doctorID = request.form['doctorID']
+    path = os.path.join(app.config['UPLOAD_FOLDER_PRESCRIPTIONS'], patientID, doctorID, filename)
+    return send_file(path)
 
-class MedicalTests(Resource):
-    def get(self):
+@app.route("/medicaltest", methods=['GET', 'POST'])
+@login_required
+def medicalTest():
+    if request.method == 'GET':
         email = request.form['email']
         user = User.objects(email=email).first()
         id = str(user.id)
-        medicaltests = MedicalTests.objects(patientID=id).to_json()
+        medicaltests = MedicalTest.objects(patientID=id).to_json()
         return medicaltests, 200
 
-    def post(self):
+    if request.method == 'POST':
         file = request.files['file']
         patientID = request.form['patientID']
         labopID = request.form['labopID']
@@ -187,33 +230,21 @@ class MedicalTests(Resource):
             except OSError as error:
                 print("Directory '%s' can not be created" % path)
             file.save(os.path.join(path, unique_filename))
-            medicaltests = MedicalTests(patientID=patientID, labopID=labopID, filename=unique_filename)
+            medicaltests = MedicalTest(patientID=patientID, labopID=labopID, filename=unique_filename)
             medicaltests.save()
             return redirect('/')
         else:
             flash('Invalid Upload only txt, pdf, png, jpg, jpeg, gif') 
         return redirect('/')
 
-class DownloadMedicalTest(Resource):
+@app.route("/medicaltest/<filename>", methods=['GET'])
+@login_required
+def downloadMedicalTest(filename):
     def get(self, filename):
         patientID = request.form['patientID']
         labopID = request.form['labopID']
         path = os.path.join(app.config['UPLOAD_FOLDER_MEDICALTESTS'], patientID, labopID, filename)
         return send_file(path)
-
-# class Patient(Resource):
-#     def get(self):
-#         patients = User.objects
-#         return send_file(path)
-
-api.add_resource(Index, "/")
-api.add_resource(Register, "/register")
-api.add_resource(Login, "/login")
-api.add_resource(Prescriptions, "/prescription")
-api.add_resource(DownloadPrescription, "/prescription/<filename>")
-api.add_resource(MedicalTests, "/medicaltest")
-api.add_resource(DownloadMedicalTest, "/medicaltest/<filename>")
-# api.add_resource(Patient, "/patient")
 
 if __name__ == "__main__":
     app.run(debug=True)
