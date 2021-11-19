@@ -73,6 +73,10 @@
             background-image: linear-gradient(-20deg, #bb7413, #e7d25c)
         }
 
+        .fourth .app-description-bk {
+            background-image: linear-gradient(-20deg, #bb7413, #e7d25c)
+        }
+
         .hero-logo {
             height: 80px;
             width: 80px;
@@ -143,11 +147,7 @@
 </head>
 
 <body>
-    <div class="btn">
-        <a href="https://www.linkedin.com/in/florin-cornea-b5118057/" target="_blank">
-            <i class="fab fa-linkedin"></i>
-        </a>
-    </div>
+    
 
     <div class="first hero">
         <img class="appointment-profile-img"
@@ -159,8 +159,8 @@
         </div>
         
         <div class="app-btn">
-            <a href="#">Book Appointment</a>
-        </div>
+            <a href="{{url_for('book_app')}}">Book Appointment</a>
+        </div>  
     </div>
 
     <div class="second hero">
@@ -173,12 +173,27 @@
         </div>
         
         <div class="app-btn">
-            <a href="#">Book Test</a>
+            <a href="{{url_for('booktest')}}">Book Test</a>
+        </div>
+    </div>
+
+    <div class="third hero">
+        <img class="appointment-profile-img" src=""
+            alt="">
+        <div class="app-description-bk"></div>
+        
+        <div class="app-description">
+            <p>Request A Bed</p>
+        </div>
+        
+        <div class="app-btn">
+            <a href="{{url_for('requestbed')}}">Request</a>
         </div>
     </div>
 
 
-    <div class="third hero">
+
+    <div class="fourth hero">
         <img class="appointment-profile-img" src=""
             alt="">
         <div class="app-description-bk"></div>
