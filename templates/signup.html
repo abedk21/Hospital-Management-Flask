@@ -86,7 +86,9 @@
       var lastName = document.getElementById("lastName").value;
       var phoneNumber = document.getElementById("typePhoneX").value;
       var age = document.getElementById("typeAgeX").value;
-      var gender = document.getElementById("inlineFormCustomSelectPref").value;
+      var g = document.getElementById("inlineFormCustomSelectPref");
+      var gender = g.options[g.selectedIndex].text;
+
       var role = "Patient";
       let data = { email: email, password: password, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber, age: age, gender: gender, role: role };
       try {

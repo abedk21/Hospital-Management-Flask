@@ -3,8 +3,10 @@ from mongoengine.fields import DateTimeField
 from .db import db
 import json
 import mongoengine_goodjson as gj
+from flask_login import UserMixin
+from app import login_manager
 
-class User(gj.Document):
+class User(gj.Document, UserMixin):
     email = db.StringField(required=True, unique=True)
     password = db.StringField(required=True)
     firstName = db.StringField(required=True)
@@ -17,6 +19,10 @@ class User(gj.Document):
     patients = db.ListField()
     date_created = DateTimeField(default=datetime.utcnow)
 
+@login_manager.user_loader
+def load_user(id):
+    return User.objects(id=id).first()
+
 class Prescription(gj.Document):
     patientID = db.StringField(required=True)
     doctorID = db.StringField(required=True)
@@ -25,5 +31,6 @@ class Prescription(gj.Document):
 
 class MedicalTest(gj.Document):
     patientID = db.StringField(required=True)
+    labopID = db.StringField(required=True)
     filename = db.StringField(required=True)
     date_created = DateTimeField(default=datetime.utcnow)

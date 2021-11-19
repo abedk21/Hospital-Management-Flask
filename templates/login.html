@@ -51,14 +51,12 @@ const button = document.getElementById('login-btn');
 button.addEventListener('click', async _ => {
   var email = document.getElementById("typeEmailX").value;
   var password = document.getElementById("typePasswordX").value;
+  let data = {email: email, password: password}
   try {     
     const response = await fetch('http://127.0.0.1:5000/login', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: {
-        email: email,
-        password: password
-      }
+      body: JSON.stringify(data),
     });
     console.log('Completed!', response);
   } catch(err) {

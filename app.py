@@ -62,21 +62,22 @@ def index():
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        email = request.form.get('email')
+        content = request.get_json(force=True)
+        email = content['email']
         if UserExists(email):
             return {'msg': "User already exists"}, 400
-        password = request.form.get('password')
-        print("email: %s, password: %s", email, password)
+        password = content['password']
+        print("role",content['role'])
         hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
         newBody = {
             "email": email,
             "password": hashed_pw,
-            "firstName": request.form['firstName'],
-            "lastName": request.form['lastName'],
-            "phoneNumber": request.form['phoneNumber'],
-            "age": request.form['age'],
-            "gender": request.form['gender'],
-            "role": request.form['role']
+            "firstName": content['firstName'],
+            "lastName": content['lastName'],
+            "phoneNumber": content['phoneNumber'],
+            "age": content['age'],
+            "gender": content['gender'],
+            "role": content['role']
         }
         
         user = User(**newBody).save()
@@ -110,10 +111,6 @@ def verifyPw(email, password):
     else:
         return False
 
-@login_manager.user_loader
-def load_user(user):
-    return User.get(user)
-
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
@@ -130,8 +127,9 @@ def login():
         return make_response(render_template('login.html'),200,headers)
 
     if request.method == 'POST':  
-        email = request.form.get('email')
-        password = request.form.get("password")
+        content = request.get_json(force=True)
+        email = content['email']
+        password = content["password"]
         retJson, error = verifyCredentials(email, password)
         if error:
             return retJson, 400
@@ -144,7 +142,12 @@ def login():
             elif role == "patient":
                 return redirect(url_for("patdash"))
             else:
-                return redirect(url_for("techdash"))     
+                return redirect("/techdash")     
+
+
+@login_manager.user_loader
+def load_user(id):
+    return User.objects(id=id).first()
 
 @app.route("/docdash")
 @login_required
@@ -156,13 +159,13 @@ def docdash():
 @login_required
 def patdash():
     headers = {'Content-Type': 'text/html'}
-    return make_response(render_template('patdash.html'),200,headers)
+    return make_response(render_template('patients/patdash.html'),200,headers)
 
 @app.route("/techdash")
 @login_required
 def techdash():
     headers = {'Content-Type': 'text/html'}
-    return make_response(render_template('techdash.html'),200,headers)
+    return make_response(render_template('tech/techdash.html'),200,headers)
 
 @app.route("/prescription", methods=['GET', 'POST'])
 @login_required
