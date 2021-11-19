@@ -9,7 +9,6 @@ import bcrypt
 from werkzeug.utils import secure_filename
 from uuid import uuid4
 import os
-from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 
 app = Flask(__name__)
@@ -22,7 +21,6 @@ app.config['MONGODB_SETTINGS'] = {
 }
 initialize_db(app)
 app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
-bcrypt=Bcrypt(app)
 login_manager=LoginManager(app)
 login_manager.login_view='login'
 login_manager.login_message_category='info'
@@ -64,13 +62,14 @@ def index():
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        email = request.form['email']
+        email = request.form.get('email')
         if UserExists(email):
             return {'msg': "User already exists"}, 400
-        password = request.form['password']
+        password = request.form.get('password')
+        print("email: %s, password: %s", email, password)
         hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
         newBody = {
-            "email": request.form['email'],
+            "email": email,
             "password": hashed_pw,
             "firstName": request.form['firstName'],
             "lastName": request.form['lastName'],
@@ -131,8 +130,8 @@ def login():
         return make_response(render_template('login.html'),200,headers)
 
     if request.method == 'POST':  
-        email = request.form['email']
-        password = request.form["password"]
+        email = request.form.get('email')
+        password = request.form.get("password")
         retJson, error = verifyCredentials(email, password)
         if error:
             return retJson, 400
