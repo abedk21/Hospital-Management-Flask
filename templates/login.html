@@ -10,7 +10,7 @@
 </head>
 
 {% block content %}
-
+<div data-role="page" id="login" data-url="{{ url_for('login') }}"></div>
 <section class="vh-100 gradient-custom">
     <div class="container py-5 h-100">
       <div class="row d-flex justify-content-center align-items-center h-100">
@@ -57,6 +57,9 @@ button.addEventListener('click', async _ => {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(data),
+    }).then((response) => {
+      if(response.redirected)
+        window.location.href = response.url;
     });
     console.log('Completed!', response);
   } catch(err) {

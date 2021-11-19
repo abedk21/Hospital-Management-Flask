@@ -99,11 +99,28 @@
                 <ul>
                     <li><a href="#">Home</a></li>
                     <li><a href="#">Profile</a></li>
-                    <li><a href="#">Logout</a></li>
+                    <li><a id='logout' href="#">Logout</a></li>
                 </ul>
             </nav>
         </div>
     </header>
+    <script type="text/javascript">
+        const logout = document.getElementById('logout');
+        logout.addEventListener('click', async _ => {
+          try {     
+            const response = await fetch('http://127.0.0.1:5000/logout', {
+              method: 'GET',
+              headers: {'Content-Type': 'application/json'},
+            }).then((response) => {
+              if(response.redirected)
+                window.location.href = response.url;
+            });
+            console.log('Completed!', response);
+          } catch(err) {
+            console.error(`Error: ${err}`);
+          }
+        });
+    </script>
 </body>
 
 </html>

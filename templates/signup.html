@@ -9,7 +9,7 @@
     integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 </head>
 
-<body>
+<div data-role="page" id="signup" data-url="{{ url_for('register') }}"></div>
   <section class="vh-100 gradient-custom">
     <div class="container py-5 h-100">
       <div class="row d-flex justify-content-center align-items-center h-100">
@@ -96,13 +96,13 @@
           method: 'post',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
-        });
+        }).then((response) => {
+      if(response.redirected)
+        window.location.href = response.url;
+    });;
         console.log('Completed!', response);
       } catch (err) {
         console.error(`Error: ${err}`);
       }
     });
   </script>
-</body>
-
-</html>

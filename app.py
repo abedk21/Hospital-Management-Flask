@@ -136,7 +136,7 @@ def login():
         else:
             user = User.objects(email=email).first()
             login_user(user)
-            role = user.role
+            role = str(user.role).lower()
             if role == "doctor":
                 return redirect(url_for("docdash"))
             elif role == "patient":
@@ -148,6 +148,11 @@ def login():
 @login_manager.user_loader
 def load_user(id):
     return User.objects(id=id).first()
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect('/')
 
 @app.route("/docdash")
 @login_required
