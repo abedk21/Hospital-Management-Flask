@@ -115,14 +115,7 @@ def verifyPw(email, password):
 def login():
     if request.method == 'GET':
         if current_user.is_authenticated:
-            email = current_user.username
-            role = User.objects(email=email).first().role
-            if role == "doctor":
-                return redirect(url_for("docdash"))
-            elif role == "patient":
-                return redirect(url_for("patdash"))
-            else:
-                return redirect(url_for("techdash"))
+            return redirect(url_for("home"))
         headers = {'Content-Type': 'text/html'}
         return make_response(render_template('login.html'),200,headers)
 
@@ -136,13 +129,7 @@ def login():
         else:
             user = User.objects(email=email).first()
             login_user(user)
-            role = str(user.role).lower()
-            if role == "doctor":
-                return redirect(url_for("docdash"))
-            elif role == "patient":
-                return redirect(url_for("patdash"))
-            else:
-                return redirect("/techdash")     
+            return redirect(url_for("home"))    
 
 
 @login_manager.user_loader
@@ -154,23 +141,19 @@ def logout():
     logout_user()
     return redirect('/')
 
-@app.route("/docdash")
+@app.route("/home")
 @login_required
-def docdash():
-    headers = {'Content-Type': 'text/html'}
-    return make_response(render_template('doctors/docdash.html'),200,headers)
-
-@app.route("/patdash")
-@login_required
-def patdash():
-    headers = {'Content-Type': 'text/html'}
-    return make_response(render_template('patients/patdash.html'),200,headers)
-
-@app.route("/techdash")
-@login_required
-def techdash():
-    headers = {'Content-Type': 'text/html'}
-    return make_response(render_template('tech/techdash.html'),200,headers)
+def home():
+    if current_user.is_authenticated:
+        email = current_user.email
+        role = User.objects(email=email).first().role.lower()
+        headers = {'Content-Type': 'text/html'}
+        if role == "doctor":
+            return make_response(render_template('doctors/docdash.html'),200,headers)
+        elif role == "patient":           
+            return make_response(render_template('patients/patdash.html'),200,headers)
+        else:
+            return make_response(render_template('tech/techdash.html'),200,headers)
 
 @app.route("/prescription", methods=['GET', 'POST'])
 @login_required
@@ -214,13 +197,15 @@ def downloadPrescription(filename):
 
 @app.route("/medicaltest", methods=['GET', 'POST'])
 @login_required
-def medicalTest():
+def booktest():
     if request.method == 'GET':
-        email = request.form['email']
-        user = User.objects(email=email).first()
-        id = str(user.id)
-        medicaltests = MedicalTest.objects(patientID=id).to_json()
-        return medicaltests, 200
+        # email = request.form['email']
+        # user = User.objects(email=email).first()
+        # id = str(user.id)
+        # medicaltests = MedicalTest.objects(patientID=id).to_json()
+        # return medicaltests, 200
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('patients/bookmedtest.html'),200,headers)
 
     if request.method == 'POST':
         file = request.files['file']
@@ -247,11 +232,30 @@ def medicalTest():
 @app.route("/medicaltest/<filename>", methods=['GET'])
 @login_required
 def downloadMedicalTest(filename):
-    def get(self, filename):
-        patientID = request.form['patientID']
-        labopID = request.form['labopID']
-        path = os.path.join(app.config['UPLOAD_FOLDER_MEDICALTESTS'], patientID, labopID, filename)
-        return send_file(path)
+    patientID = request.form['patientID']
+    labopID = request.form['labopID']
+    path = os.path.join(app.config['UPLOAD_FOLDER_MEDICALTESTS'], patientID, labopID, filename)
+    return send_file(path)
+
+@app.route("/appointment", methods=['GET'])
+@login_required
+def book_app():
+    headers = {'Content-Type': 'text/html'}
+    return make_response(render_template('patients/book_app.html'),200,headers)
+
+@app.route("/requestbed", methods=['GET', 'POST'])
+@login_required
+def requestbed():
+    if request.method == 'GET':
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('patients/requestbed.html'),200,headers)
+
+@app.route("/profile", methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'GET':
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('patients/profile.html'),200,headers)
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -98,7 +98,7 @@
             <nav>
                 <ul>
                     <li><a href="#">Home</a></li>
-                    <li><a href="#">Profile</a></li>
+                    <li><a id='profile' href="{{url_for('profile')}}">Profile</a></li>
                     <li><a id='logout' href="#">Logout</a></li>
                 </ul>
             </nav>
@@ -120,6 +120,7 @@
             console.error(`Error: ${err}`);
           }
         });
+
     </script>
 </body>
 

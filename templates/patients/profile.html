@@ -2175,4 +2175,40 @@
 
         </div>
     </div>
+
+    <script>
+        const button = document.getElementById('register-btn'); 
+        button.addEventListener('click', async _ => {
+          var email = document.getElementById("typeEmailX").value;
+          var password = document.getElementById("typePasswordX").value;
+          var firstName = document.getElementById("firstName").value;
+          var lastName = document.getElementById("lastName").value;
+          var phoneNumber = document.getElementById("typePhoneX").value;
+          var age = document.getElementById("typeAgeX").value;
+          var g = document.getElementById("inlineFormCustomSelectPref");
+          var gender = g.options[g.selectedIndex].text;
+    
+          var role = "Patient";
+          let data = { email: email, password: password, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber, age: age, gender: gender, role: role };
+          try {
+            const response = await fetch('http://127.0.0.1:5000/user', {
+              method: 'get',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            }).then((response) => {
+          if(response.redirected)
+            window.location.href = response.url;
+        });;
+            console.log('Completed!', response);
+          } catch (err) {
+            console.error(`Error: ${err}`);
+          }
+        });
+      
+            function goBack() {
+                window.location.href = 'http://127.0.0.1:5000/home';
+                // window.history.back();
+            }
+    
+      </script>
 </body>
