@@ -1,5 +1,6 @@
 from database.db import initialize_db
 from database.models import *
+import pymongo
 from flask import Flask, Response, request, render_template, url_for, send_file, flash, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_restful import Api, Resource
@@ -16,8 +17,9 @@ api = Api(app)
 
 app.config['MONGODB_SETTINGS'] = {
     'db': 'medup',
-    'host': 'localhost',
-    'port': 27017
+    # 'host': 'localhost',
+    # 'port': 27017
+    'host': 'mongodb://medup:aOetlKIGdaiUB8VYB1BZvkGUSQltHi30pTyMZ7n5ksRogkUTgJluIefw5jEspLuHt6LyMaEmelCsW6DjflZyIQ==@medup.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@medup@'
 }
 initialize_db(app)
 app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
