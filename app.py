@@ -257,5 +257,12 @@ def profile():
         headers = {'Content-Type': 'text/html'}
         return make_response(render_template('patients/profile.html'),200,headers)
 
+@app.route("/user", methods=['GET', 'POST'])
+@login_required
+def user():
+    if request.method == 'GET':
+        headers = {'Content-Type': 'application/json'}
+        return make_response(current_user.to_json(),200,headers)
+
 if __name__ == "__main__":
     app.run(debug=True)
