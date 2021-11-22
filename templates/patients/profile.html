@@ -2191,7 +2191,7 @@
           var role = "Patient";
           let data = { email: email, password: password, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber, age: age, gender: gender, role: role };
           try {
-            const response = await fetch('http://127.0.0.1:5000/user', {
+            const response = await fetch("{{ url_for('user') }}", {
               method: 'get',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(data),
@@ -2206,7 +2206,7 @@
         });
       
             function goBack() {
-                window.location.href = 'http://127.0.0.1:5000/home';
+                window.location.href = "{{ url_for('home') }}";
                 // window.history.back();
             }
     

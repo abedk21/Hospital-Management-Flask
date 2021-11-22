@@ -82,7 +82,7 @@ button.addEventListener('click', async _ => {
   var password = document.getElementById("typePasswordX").value;
   let data = {email: email, password: password}
   try {     
-    const response = await fetch('http://127.0.0.1:5000/login', {
+    const response = await fetch("{{ url_for('login') }}", {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(data),
