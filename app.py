@@ -1,9 +1,7 @@
 from database.db import initialize_db
 from database.models import *
-import pymongo
 from flask import Flask, Response, request, render_template, url_for, send_file, flash, redirect, url_for
-from flask_bootstrap import Bootstrap
-from flask_restful import Api, Resource
+from flask_restful import Api
 from flask import make_response
 from flask_login import login_user, current_user, logout_user, login_required
 import bcrypt
