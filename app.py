@@ -158,7 +158,7 @@ def home():
             return make_response(render_template('tech/techdash.html'),200,headers)
 
 @app.route("/prescription", methods=['GET', 'POST'])
-@login_required
+# @login_required
 def prescription():
     if request.method == 'GET':
         email = request.form['email']
@@ -190,7 +190,7 @@ def prescription():
         return redirect('/') 
 
 @app.route("/prescription/<filename>", methods=['GET'])
-@login_required
+# @login_required
 def downloadPrescription(filename):
     patientID = request.form['patientID']
     doctorID = request.form['doctorID']
