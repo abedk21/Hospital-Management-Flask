@@ -1,4 +1,7 @@
 <head>
+
+<meta charset="UTF-8">
+
     <style>
         :root {
             --blue: #5e72e4;
@@ -2167,7 +2170,7 @@
                                         class="form-control form-control-alternative" placeholder="Postal code">
                                 </div>
                             </div>
-                            <button class=save>Save</button>
+                            <button id='save-btn' class=save>Save</button>
                         </div>
                     </div>
                 </form>
@@ -2205,11 +2208,50 @@
             document.getElementById("input-mobile-number").value = data.phoneNumber;
           }
         });
+
+        const savebutton = document.getElementById('save-btn');
+        $(savebutton).on("click", function(e) {
+            e.preventDefault();
+            var email = document.getElementById("input-email").value;
+            var firstName = document.getElementById("input-first-name").value;
+            var lastName = document.getElementById("input-last-name").value;
+            var phoneNumber = document.getElementById("input-mobile-number").value;
+            let data = {email: email, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber}
+            $.ajax({
+                    type: "PATCH",
+                    url: "{{ url_for('update') }}",
+                    data: JSON.stringify(data),
+                    success: function(result) {
+                        alert('Info updated successfully');
+                    },
+                    error: function(result) {
+                        alert('error');
+                    }
+                });
+        });
         });
         function goBack() {
             window.location.href = "{{ url_for('home') }}";
             // window.history.back();
         }
+
+// const button = document.getElementById('save-btn');
+// button.addEventListener('click', async _ => {
+
+//   try {     
+//     const response = await fetch("{{ url_for('update') }}", {
+//       method: 'PATCH',
+//       headers: {'Content-Type': 'application/json'},
+//       body: JSON.stringify(data),
+//     }).then((response) => {
+//         window.alert("Info saved successfully");
+//         location.reload(); 
+//     });
+//     console.log('Completed!', response);
+//   } catch(err) {
+//     console.error(`Error: ${err}`);
+//   }
+// });
         //$(window).on("load", setupData);
     </script>
 </body>

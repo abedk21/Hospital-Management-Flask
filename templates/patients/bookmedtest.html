@@ -148,30 +148,18 @@
       <button class = "btn back" onclick="goBack()">Go Back</button>
       <div class="container">
         <form action="app_booking" method="post">
-          <h1>Book An Appointment</h1>
-          <div class="elem-group">
-            <label for="name">Patient Name</label>
-            <input type="text" id="name" name="visitor_name" placeholder="Name" pattern=[A-Z\sa-z]{3,20} required>
-          </div>
-          <div class="elem-group">
-            <label for="email">E-mail</label>
-            <input type="email" id="email" name="visitor_email" placeholder="the.weeknd@email.com" required>
-          </div>
-          <div class="elem-group">
-            <label for="phone">Phone</label>
-            <input type="tel" id="phone" name="visitor_phone" placeholder="498-348-3872"
-              pattern=(\d{3})-?\s?(\d{3})-?\s?(\d{4}) required>
-          </div>
+          <h1>Book Medical Test</h1>
           <hr>
-          <div class="elem-group inlined">
-            <label for="adult">Age</label>
-            <input type="number" id="adult" name="total_adults" placeholder="18" min="1" required>
-          </div>
-    
           <div class="elem-group">
-            <label for="room-selection">Select Doctor</label>
+            <label for="room-selection">Select Test Type</label>
             <select id="room-selection" name="room_preference" required>
-              <option value="">Choose Doctor</option>
+              <option value="">Choose Test Type</option>
+            </select>
+          </div>    
+          <div class="elem-group">
+            <label for="room-selection">Select Lab Operator</label>
+            <select id="room-selection" name="room_preference" required>
+              <option value="">Choose Lab Operator</option>
               <option value="harry">Dr Harry</option>
               <option value="hermoine">Dr Hermoine</option>
               <option value="ron">Dr Ron</option>

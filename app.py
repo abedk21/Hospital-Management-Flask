@@ -56,6 +56,8 @@ def UserExists(email):
 
 @app.route("/")
 def index():
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
     headers = {'Content-Type': 'text/html'}
     return make_response(render_template('index.html'),200,headers)
 
@@ -255,7 +257,7 @@ def requestbed():
 def profile():
     if request.method == 'GET':
         headers = {'Content-Type': 'text/html'}
-        return make_response(render_template('patients/profile.html'),200,headers)
+        return make_response(render_template('profile.html'),200,headers)
 
 @app.route("/user", methods=['GET', 'POST'])
 @login_required
@@ -263,6 +265,19 @@ def user():
     if request.method == 'GET':
         headers = {'Content-Type': 'application/json'}
         return make_response(current_user.to_json(),200,headers)
+
+@app.route("/update", methods=['PATCH'])
+@login_required
+def update():
+    content = request.get_json(force=True)
+    User.objects(id = current_user.id).update(
+        email = content['email'],
+        firstName = content['firstName'],
+        lastName = content['lastName'],
+        phoneNumber = content['phoneNumber']
+    )
+    headers = {'Content-Type': 'application/json'}
+    return make_response(current_user.to_json(),200,headers)
 
 if __name__ == "__main__":
     app.run(debug=True)
