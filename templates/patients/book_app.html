@@ -1,207 +1,274 @@
-
 <html>
-    <head>
-      <style>
-        .container {
-          min-height: 100vh;
-          background: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-flow: column;
-          padding-bottom: 60px;
-        }
-    
-        .container form {
-          background: rgb(228, 231, 245);
-          border-radius: 5px;
-          box-shadow: 0 10px 15px rgba(0, 0, 0, .1);
-          padding: 54px;
-          width: 600px;
-          padding-top: 10px;
-        }
-    
-        .container form .inputBox {
-          margin-top: 20px;
-        }
-    
-        .container form .inputBox span {
-          display: block;
-          color: #999;
-          padding-bottom: 5px;
-        }
-    
-        .container form .inputBox input,
-        .container form .inputBox select {
-          width: 100%;
-          padding: 10px;
-          border-radius: 10px;
-          border: 1px solid rgba(0, 0, 0, .3);
-          color: #444;
-        }
-    
-        .container form .flexbox {
-          display: flex;
-          gap: 15px;
-        }
-    
-        .container form .flexbox .inputBox {
-          flex: 1 1 150px;
-        }
-    
-        .container form .submit-btn {
-          width: 100%;
-          background: linear-gradient(45deg, blueviolet, deeppink);
-          margin-top: 20px;
-          padding: 10px;
-          font-size: 20px;
-          color: #fff;
-          border-radius: 10px;
-          cursor: pointer;
-          transition: .2s linear;
-        }
-    
-        body {
-          width: 500px;
-          margin: 100 auto;
-         
-        }
-    
-        div.elem-group {
-          margin: 20px 0;
-        }
-    
-        div.elem-group.inlined {
-          width: 100%;
-          display: inline-block;
-          margin-left: 1%;
-        }
-    
-        label {
-          display: block;
-          font-family: 'Arial Hebrew';
-          padding-bottom: 10px;
-          font-size: 1.25em;
-        }
-    
-        input,
-        select,
-        textarea {
-          border-radius: 5px;
-          border: 1px solid #777;
-          box-sizing: border-box;
-          font-size: 1.25em;
-          font-family: 'Apple Symbols';
-          width: 100%;
-          padding: 10px;
-        }
-    
-        div.elem-group.inlined input {
-          width: 95%;
-          display: inline-block;
-        }
-    
-        textarea {
-          height: 200px;
-        }
-    
-        hr {
-          border: 1px dotted #ccc;
-        }
-    
-        button {
-          height: 50px;
-          background: orange;
-          border: none;
-          color: white;
-          font-size: 1.25em;
-          font-family: 'Arial Hebrew';
-          border-radius: 4px;
-          cursor: pointer;
-          margin-top: 15px;
-          padding: 15px;
-        }
-    
-        button:hover {
-          border: 2px solid black;
-        }
-    
-        h1 {
-          margin-bottom: 40px;
-          margin-left:145;
-          font-family:Arial;
-        }
-    
-        .btn.back {
-         margin-left: -250px;
-         margin-bottom: 55px;
-         max-height: 45px;
-         padding-top: 11px;
-         }
-         
-      </style>
-    
-      
-    </head>
-    
-    <body>
-      <button class = "btn back" onclick="goBack()">Go Back</button>
-      <div class="container">
-        <form action="app_booking" method="post">
-          <h1>Book An Appointment</h1>
-          <hr>
-          <div class="elem-group">
-            <label for="room-selection">Select Department</label>
-            <select id="room-selection" name="room_preference" required>
-              <option value="">Choose Department</option>
-            </select>
-          </div>    
-          <div class="elem-group">
-            <label for="room-selection">Select Doctor</label>
-            <select id="room-selection" name="room_preference" required>
-              <option value="">Choose Doctor</option>
-              <option value="harry">Dr Harry</option>
-              <option value="hermoine">Dr Hermoine</option>
-              <option value="ron">Dr Ron</option>
-            </select>
-          </div>
-    
-    
-    
-          <div class="elem-group inlined">
-            <label for="checkin-date">Select Date</label>
-            <input type="date" id="checkin-date" name="checkin" required>
-          </div>
-    
-          <div class="elem-group">
-            <label for="room-selection">Select Time</label>
-            <select id="room-selection" name="room_preference" required>
-              <option value="">Choose Time Slot</option>
-              <option value="">10-11 AM</option>
-              <option value="adjoining">11-12 PM</option>
-              <option value="adjacent">12-1 PM</option>
-              <option value="adjacent">1-2 PM</option>
-              <option value="adjacent">2-3 PM</option>
-              <option value="adjacent">3-4 PM</option>
-              <option value="adjacent">4-5 PM</option>
-            </select>
-          </div>
-    
-          <div class="elem-group">
-            <label for="message">Anything Else?</label>
-            <textarea id="message" name="visitor_message" placeholder="Tell us anything else that might be important."
-              required></textarea>
-          </div>
-          <button type="submit">Book Appointment</button>
-        </form>
-    
+
+<head>
+  <style>
+    .container {
+      min-height: 100vh;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-flow: column;
+      padding-bottom: 60px;
+    }
+
+    .container form {
+      background: rgb(228, 231, 245);
+      border-radius: 5px;
+      box-shadow: 0 10px 15px rgba(0, 0, 0, .1);
+      padding: 54px;
+      width: 600px;
+      padding-top: 10px;
+    }
+
+    .container form .inputBox {
+      margin-top: 20px;
+    }
+
+    .container form .inputBox span {
+      display: block;
+      color: #999;
+      padding-bottom: 5px;
+    }
+
+    .container form .inputBox input,
+    .container form .inputBox select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 0, 0, .3);
+      color: #444;
+    }
+
+    .container form .flexbox {
+      display: flex;
+      gap: 15px;
+    }
+
+    .container form .flexbox .inputBox {
+      flex: 1 1 150px;
+    }
+
+    .container form .submit-btn {
+      width: 100%;
+      background: linear-gradient(45deg, blueviolet, deeppink);
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 20px;
+      color: #fff;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: .2s linear;
+    }
+
+    body {
+      width: 500px;
+      margin: 100 auto;
+
+    }
+
+    div.elem-group {
+      margin: 20px 0;
+    }
+
+    div.elem-group.inlined {
+      width: 100%;
+      display: inline-block;
+      margin-left: 1%;
+    }
+
+    label {
+      display: block;
+      font-family: 'Arial Hebrew';
+      padding-bottom: 10px;
+      font-size: 1.25em;
+    }
+
+    input,
+    select,
+    textarea {
+      border-radius: 5px;
+      border: 1px solid #777;
+      box-sizing: border-box;
+      font-size: 1.25em;
+      font-family: 'Apple Symbols';
+      width: 100%;
+      padding: 10px;
+    }
+
+    div.elem-group.inlined input {
+      width: 95%;
+      display: inline-block;
+    }
+
+    textarea {
+      height: 200px;
+    }
+
+    hr {
+      border: 1px dotted #ccc;
+    }
+
+    button {
+      height: 50px;
+      background: orange;
+      border: none;
+      color: white;
+      font-size: 1.25em;
+      font-family: 'Arial Hebrew';
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 15px;
+      padding: 15px;
+    }
+
+    button:hover {
+      border: 2px solid black;
+    }
+
+    h1 {
+      margin-bottom: 40px;
+      margin-left: 145;
+      font-family: Arial;
+    }
+
+    .btn.back {
+      margin-left: -250px;
+      margin-bottom: 55px;
+      max-height: 45px;
+      padding-top: 11px;
+    }
+  </style>
+
+
+</head>
+
+<body>
+  <button class="btn back" onclick="goBack()">Go Back</button>
+  <div class="container">
+    <form action="app_booking" method="post">
+      <h1>Book An Appointment</h1>
+      <hr>
+      <div class="elem-group">
+        <label for="department-selection">Select Department</label>
+        <select id="department-selection" name="room_preference" required>
+          <option value="">Choose Department</option>
+        </select>
       </div>
-    
-      <script>
+      <div class="elem-group">
+        <label for="doctor-selection">Select Doctor</label>
+        <select id="doctor-selection" name="room_preference" required>
+          <option value="">Choose Doctor</option>
+        </select>
+      </div>
+
+
+
+      <div class="elem-group inlined">
+        <label for="checkin-date">Select Date</label>
+        <input type="date" id="checkin-date" name="checkin" required>
+      </div>
+
+      <div class="elem-group">
+        <label for="time-selection">Select Time</label>
+        <select id="time-selection" name="time_preference" required>
+          <option value="">Choose Time Slot</option>
+          <option value="">10-11 AM</option>
+          <option value="adjoining">11-12 PM</option>
+          <option value="adjacent">12-1 PM</option>
+          <option value="adjacent">1-2 PM</option>
+          <option value="adjacent">2-3 PM</option>
+          <option value="adjacent">3-4 PM</option>
+          <option value="adjacent">4-5 PM</option>
+        </select>
+      </div>
+
+      <div class="elem-group">
+        <label for="message">Anything Else?</label>
+        <textarea id="message" name="visitor_message" placeholder="Tell us anything else that might be important."
+          required></textarea>
+      </div>
+      <button id="submit-btn" type="submit">Book Appointment</button>
+    </form>
+
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+  <script type="text/JavaScript">
+var doctors;
+var doctor;
+$(document).ready(function() {
+        
+        $.ajax({
+                    type: "GET",
+                    dataType: "JSON",
+                    url: "{{ url_for('departments') }}",
+                    //data: JSON.stringify(data),
+                    success: function(result) {
+                      document.getElementById("department-selection").innerHTML = "";
+            var optionList = "<option value=\"\">Choose Department</option>";
+            $.each(result, function(idx, obj) {
+              optionList += "<option value=\"\">"+obj.department+"</option>";
+                  });
+            document.getElementById("department-selection").innerHTML = optionList;
+                    },
+                    error: function(result) {
+                        alert('error');
+                    }
+                });
+
+                $.ajax({
+                    type: "GET",
+                    dataType: "JSON",
+                    url: "{{ url_for('doctors') }}",
+                    //data: JSON.stringify(data),
+                    success: function(result) {
+                      doctors = result
+                    },
+                    error: function(result) {
+                        alert('error');
+                    }
+                });
+    });
+
+    document.getElementById('department-selection').addEventListener('change', function() {    
+      var optionList = "<option value=\"0\">Choose Doctor</option>";
+      var e = document.getElementById('department-selection');
+      var dep = e.options[e.selectedIndex].text;
+            $.each(doctors, function(idx, obj) {
+              if(obj.department == dep) {
+              optionList += "<option value=\""+obj.id+"\">Dr. "+obj.firstName+" "+obj.lastName+"</option>";
+              }
+                  });
+                  document.getElementById("doctor-selection").innerHTML = optionList;
+  });
+
+  const submitbutton = document.getElementById('submit-btn');
+        $(submitbutton).on("click", function(e) {
+            e.preventDefault();
+            var doctorID = String(document.getElementById("doctor-selection").value);
+            var e = document.getElementById("time-selection");
+            var timeSlot = e.options[e.selectedIndex].text;
+            var date = document.getElementById("checkin-date").value;
+            var note = String(document.getElementById("message").value);
+            let data = {doctorID: doctorID, timeSlot: timeSlot, date: date, note: note}
+            $.ajax({
+                    type: "POST",
+                    url: "{{ url_for('book_app') }}",
+                    data: JSON.stringify(data),
+                    success: function(result) {
+                        alert('Appointment Booked successfully');
+                    },
+                    error: function(result) {
+                        alert('error');
+                    }
+                });
+        });
+
         function goBack() {
        window.history.back();
        }
       </script>
-    </body>
-    
-    </html>
+</body>
+
+</html>

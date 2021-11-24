@@ -1,4 +1,4 @@
-from database.db import initialize_db
+from database.db import *
 from database.models import *
 from flask import Flask, Response, request, render_template, url_for, send_file, flash, redirect, url_for
 from flask_restful import Api
@@ -69,8 +69,11 @@ def register():
         if UserExists(email):
             return {'msg': "User already exists"}, 400
         password = content['password']
-        print("role",content['role'])
+        role = content['role']
         hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
+        department = ""
+        if(role == "Doctor"):
+            department = content['department']
         newBody = {
             "email": email,
             "password": hashed_pw,
@@ -79,6 +82,7 @@ def register():
             "phoneNumber": content['phoneNumber'],
             "age": content['age'],
             "gender": content['gender'],
+            "department": department,
             "role": content['role']
         }
         
@@ -239,11 +243,17 @@ def downloadMedicalTest(filename):
     path = os.path.join(app.config['UPLOAD_FOLDER_MEDICALTESTS'], patientID, labopID, filename)
     return send_file(path)
 
-@app.route("/appointment", methods=['GET'])
+@app.route("/appointment", methods=['GET', 'POST'])
 @login_required
 def book_app():
-    headers = {'Content-Type': 'text/html'}
-    return make_response(render_template('patients/book_app.html'),200,headers)
+    if request.method == 'GET':
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('patients/book_app.html'),200,headers)
+    if request.method == 'POST':
+        content = request.get_json(force=True)
+        Appointment(patientID=str(current_user.id),doctorID=content['doctorID'],date=content['date'],timeSlot=content['timeSlot'],note=content['note']).save()
+        headers = {'Content-Type': 'text/html'}
+        return make_response("",200,headers)
 
 @app.route("/requestbed", methods=['GET', 'POST'])
 @login_required
@@ -265,6 +275,34 @@ def user():
     if request.method == 'GET':
         headers = {'Content-Type': 'application/json'}
         return make_response(current_user.to_json(),200,headers)
+
+@app.route("/docappointments", methods=['GET', 'POST'])
+@login_required
+def docappointments():
+    if request.method == 'GET':
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('bookings.html'),200,headers)
+
+@app.route("/departments", methods=['GET', 'POST'])
+def departments():
+    if request.method == 'POST':
+        content = request.get_json(force=True)
+        departments = content['departments']
+        for department in departments:
+            Department(department=department).save()
+        headers = {'Content-Type': 'application/json'}
+        return make_response("",200,headers)
+    if request.method == 'GET':
+        departments = Department.objects()
+        headers = {'Content-Type': 'application/json'}
+        return make_response(departments.to_json(),200,headers)
+
+@app.route("/doctors", methods=['GET', 'POST'])
+def doctors():
+    if request.method == 'GET':
+        doctors = User.objects(role='Doctor')
+        headers = {'Content-Type': 'application/json'}
+        return make_response(doctors.to_json(),200,headers)
 
 @app.route("/update", methods=['PATCH'])
 @login_required

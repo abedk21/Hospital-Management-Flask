@@ -1,0 +1,124 @@
+<head>
+    <style>
+        .styled-table {
+            border-collapse: collapse;
+            margin-top: 125px;
+            font-size: 0.9em;
+            font-family: sans-serif;
+            min-width: 90%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+            margin-left: 55px;
+        }
+
+        .styled-table thead tr {
+            background-color: #009879;
+            color: #ffffff;
+            text-align: left;
+        }
+
+        .styled-table th,
+        .styled-table td {
+            padding: 12px 15px;
+        }
+
+        .styled-table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+
+        .styled-table tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+
+        .styled-table tbody tr:last-of-type {
+            border-bottom: 2px solid #009879;
+        }
+
+        .styled-table tbody tr.active-row {
+            font-weight: bold;
+            color: #009879;
+        }
+
+        .header {
+            padding: 5px;
+            text-align: center;
+            background: #009879;
+            color: white;
+            font-size: 22px;
+        }
+
+        h1 {
+            font-family: Apple Symbols;
+
+        }
+
+        .btn.back {
+
+            margin-bottom: -50px;
+            max-height: 45px;
+            padding-top: 5px;
+        }
+
+        button {
+            height: 30px;
+            background: orange;
+            border: none;
+            color: white;
+            font-size: 1.25em;
+            font-family: 'Arial Hebrew';
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 50px;
+            padding: 15px;
+        }
+
+        .styled-table th,
+        .styled-table td {
+            padding: 12px 45px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>View Appointments</h1>
+    </div>
+    <button class="btn back" onclick="goBack()">Go Back</button>
+    <table class="styled-table">
+
+        <thead>
+            <tr>
+                <th>Booking Id</th>
+                <th>Patient Name</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>File Upload</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1234</td>
+                <td>Varun Puri</td>
+                <td>Nov 22, 2021</td>
+                <td>10-11 AM</td>
+                <td><input type="file" id="myFile" name="filename"></td>
+
+            </tr>
+            <tr class="active-row">
+                <td>1235</td>
+                <td>Keeanu</td>
+                <td>Nov 24, 2021</td>
+                <td>4-5 PM</td>
+                <td><input type="file" id="myFile" name="filename"></td>
+            </tr>
+            <!-- and so on... -->
+        </tbody>
+    </table>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+
+</body>
