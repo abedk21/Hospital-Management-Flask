@@ -174,7 +174,7 @@
         <select id="time-selection" name="time_preference" required>
           <option value="">Choose Time Slot</option>
           <option value="">10-11 AM</option>
-          <option value="adjoining">11-12 PM</option>
+          <option value="adjoining">11-12 AM</option>
           <option value="adjacent">12-1 PM</option>
           <option value="adjacent">1-2 PM</option>
           <option value="adjacent">2-3 PM</option>
@@ -197,6 +197,7 @@
   <script type="text/JavaScript">
 var doctors;
 var doctor;
+var appointments;
 $(document).ready(function() {
         
         $.ajax({
@@ -229,6 +230,19 @@ $(document).ready(function() {
                         alert('error');
                     }
                 });
+
+                $.ajax({
+                    type: "GET",
+                    dataType: "JSON",
+                    url: "{{ url_for('check_app') }}",
+                    //data: JSON.stringify(data),
+                    success: function(result) {
+                      appointments = result
+                    },
+                    error: function(result) {
+                        alert('error');
+                    }
+                });
     });
 
     document.getElementById('department-selection').addEventListener('change', function() {    
@@ -241,6 +255,43 @@ $(document).ready(function() {
               }
                   });
                   document.getElementById("doctor-selection").innerHTML = optionList;
+  });
+
+  document.getElementById('doctor-selection').addEventListener('change', function() {
+    var doctorID = document.getElementById('doctor-selection').value;
+    var optionList = "<option value=\"\">Choose Time Slot</option>";
+    var date = document.getElementById('checkin-date').value;
+      var timeSlots = ["10-11 AM","11-12 AM","12-1 PM","1-2 PM","2-3 PM","3-4 PM","4-5 PM"];
+      var booked = [];
+            $.each(appointments, function(idx, obj) {
+              if(timeConverter(obj.date.$date) == timeConverter(date) && obj.doctorID == doctorID) {
+                if (timeSlots.includes(obj.timeSlot) && !booked.includes(obj.timeSlot)) {
+                  booked.push(obj.timeSlot);
+                }
+              }
+            });
+            $.each(timeSlots, function(idx, obj) {
+                if (!booked.includes(obj)) {
+                  optionList += "<option value=\"\">"+obj+"</option>";
+                }
+            });
+            if(booked.length == 7) {
+              optionList = "<option value=\"\">No Available Time Slots</option>";
+            }
+            document.getElementById("time-selection").innerHTML = optionList;
+
+            function timeConverter(UNIX_timestamp){
+                    var a = new Date(UNIX_timestamp);
+                    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    var year = a.getFullYear();
+                    var month = months[a.getMonth()];
+                    var date = a.getDate();
+                    var hour = a.getHours();
+                    var min = a.getMinutes();
+                    var sec = a.getSeconds();
+                    var time = date + ' ' + month + ' ' + year;
+                    return time;
+                }
   });
 
   const submitbutton = document.getElementById('submit-btn');

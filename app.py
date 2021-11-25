@@ -1,6 +1,6 @@
 from database.db import *
 from database.models import *
-from flask import Flask, Response, request, render_template, url_for, send_file, flash, redirect, url_for, jsonify
+from flask import Flask, request, render_template, url_for, send_file, flash, redirect, url_for, jsonify
 from flask_restful import Api
 from flask import make_response
 from flask_login import login_user, current_user, logout_user, login_required
@@ -15,9 +15,9 @@ api = Api(app)
 
 app.config['MONGODB_SETTINGS'] = {
     'db': 'medup',
-    'host': 'localhost',
-    'port': 27017
-    # 'host': 'mongodb://medup:aOetlKIGdaiUB8VYB1BZvkGUSQltHi30pTyMZ7n5ksRogkUTgJluIefw5jEspLuHt6LyMaEmelCsW6DjflZyIQ==@medup.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@medup@'
+    # 'host': 'localhost',
+    # 'port': 27017
+    'host': 'mongodb://medup:aOetlKIGdaiUB8VYB1BZvkGUSQltHi30pTyMZ7n5ksRogkUTgJluIefw5jEspLuHt6LyMaEmelCsW6DjflZyIQ==@medup.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@medup@'
 }
 initialize_db(app)
 app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
@@ -243,15 +243,22 @@ def downloadMedicalTest(filename):
     path = os.path.join(app.config['UPLOAD_FOLDER_MEDICALTESTS'], patientID, labopID, filename)
     return send_file(path)
 
-@app.route("/appointment", methods=['GET', 'POST'])
+@app.route("/bookappointment", methods=['GET', 'POST'])
 @login_required
 def book_app():
     if request.method == 'GET':
         headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('patients/book_app.html'),200,headers)
+
+@app.route("/appointment", methods=['GET', 'POST'])
+@login_required
+def appointment():
+    if request.method == 'GET':
+        headers = {'Content-Type': 'text/html'}
         if current_user.role == "Patient":
-            return make_response(render_template('patients/book_app.html'),200,headers)
+            return make_response(render_template('patients/bookings.html'),200,headers)
         if current_user.role == "Doctor":
-            return make_response(render_template('bookings.html'),200,headers)
+            return make_response(render_template('doctor/bookings.html'),200,headers)
     if request.method == 'POST':
         content = request.get_json(force=True)
         Appointment(patientID=str(current_user.id),doctorID=content['doctorID'],date=content['date'],timeSlot=content['timeSlot'],note=content['note']).save()
@@ -263,16 +270,34 @@ def book_app():
 def appointments():
     if request.method == 'GET':
         newBody = []
-        appointments = Appointment.objects(doctorID=str(current_user.id))
-        for appointment in appointments:
-            patient = User.objects(id=str(appointment.patientID)).first()
-            newBody.append({
-            "appointment": appointment,
-            "patient": patient
-            })
+        if current_user.role == "Doctor":
+            appointments = Appointment.objects(doctorID=str(current_user.id))
+            for appointment in appointments:
+                patient = User.objects(id=str(appointment.patientID)).first()
+                newBody.append({
+                "appointment": appointment,
+                "patient": patient
+                })
+            headers = {'Content-Type': 'application/json'}
+            return make_response(jsonify(newBody),200,headers)
+        if current_user.role == "Patient":
+            appointments = Appointment.objects(patientID=str(current_user.id))
+            for appointment in appointments:
+                doctor = User.objects(id=str(appointment.doctorID)).first()
+                newBody.append({
+                "appointment": appointment,
+                "doctor": doctor
+                })
+            headers = {'Content-Type': 'application/json'}
+            return make_response(jsonify(newBody),200,headers)
+
+@app.route("/checkapp", methods=['GET', 'POST'])
+@login_required
+def check_app():
+    if request.method == 'GET':
+        appointments = Appointment.objects(patientID=str(current_user.id))
         headers = {'Content-Type': 'application/json'}
-        return make_response(jsonify(newBody),200,headers)
-        # return make_response(appointments.to_json(),200,headers)
+        return make_response(appointments.to_json(),200,headers)
 
 @app.route("/requestbed", methods=['GET', 'POST'])
 @login_required
