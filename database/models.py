@@ -21,6 +21,7 @@ class User(gj.Document, UserMixin):
 class Prescription(gj.Document):
     patientID = db.StringField(required=True)
     doctorID = db.StringField(required=True)
+    appID = db.StringField(required=True)
     filename = db.StringField(required=True)
     date_created = DateTimeField(default=datetime.utcnow)
 
