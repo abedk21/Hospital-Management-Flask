@@ -143,7 +143,7 @@
 </head>
 
 <body>
-    <div data-role="page" id="techdash" data-url="{{ url_for('techdash') }}"></div>
+    <div data-role="page" id="techdash" data-url="{{ url_for('home') }}"></div>
     <div class="btn">
         <a href="https://www.linkedin.com/in/florin-cornea-b5118057/" target="_blank">
             <i class="fab fa-linkedin"></i>
@@ -160,7 +160,7 @@
         </div>
         
         <div class="app-btn">
-            <a href="#">Go To Appointments</a>
+            <a href="{{ url_for('viewmedtestapps') }}">Go To Appointments</a>
         </div>
     </div>
 
@@ -174,12 +174,23 @@
         </div>
         
         <div class="app-btn">
-            <a href="#">Upload Documents</a>
+            <a href="{{url_for('medicaltest')}}">Upload Documents</a>
         </div>
     </div>
 
-
-
+    <div class="second hero">
+        <img class="appointment-profile-img" src=""
+            alt="">
+        <div class="app-description-bk"></div>
+        
+        <div class="app-description">
+            <p>Test Results</p>
+        </div>
+        
+        <div class="app-btn">
+            <a href="{{url_for('viewtestresults')}}">View Test Results</a>
+        </div>
+    </div>
 
 </body>
 

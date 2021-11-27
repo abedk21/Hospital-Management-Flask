@@ -71,6 +71,15 @@
             padding: 15px;
         }
 
+        .delete-btn {
+            background: red;
+            font-size: medium;
+            margin-bottom: 0px;
+            margin-top: 0px;
+            max-height: 45px;
+            padding-top: 5px;
+        }
+
         .styled-table th,
         .styled-table td {
             padding: 12px 45px;
@@ -88,10 +97,12 @@
 
         <thead>
             <tr>
-                <th>Patient Name</th>
+                <th>Lab Operator Name</th>
+                <th>Medcial Test Type</th>
                 <th>Date</th>
                 <th>Time</th>
-                <th>Prescription</th>
+                <th>Result</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -107,21 +118,25 @@ $(document).ready(function() {
         $.ajax({
                     type: "GET",
                     dataType: "JSON",
-                    url: "{{ url_for('appointments') }}",
+                    url: "{{ url_for('medtestapps') }}",
                     //data: JSON.stringify(data),
                     success: function(result) {
                         
             var rows = "";
+            //JSON.stringify(result)
             $.each(result, function(idx, obj) {
-              column1 = "<tr>\n<td>"+capitalizeFirstLetter(obj.patient.firstName)+" "+capitalizeFirstLetter(obj.patient.lastName)+"</td>\n";
-              column2 = "<td>"+timeConverter(obj.appointment.date)+"</td>\n";
-              column3 = "<td>"+obj.appointment.timeSlot+"</td>\n";
-              var status = "Uploaded";
-              if(!obj.appointment.prescription){
-                  status = "Not Uploaded";
+              column1 = "<tr>\n<td>"+capitalizeFirstLetter(obj.labop.firstName)+" "+capitalizeFirstLetter(obj.labop.lastName)+"</td>\n";
+              column2 = "<td>"+capitalizeFirstLetter(obj.labop.department)+"</td>\n"
+              column3 = "<td>"+timeConverter(obj.appointment.date)+"</td>\n";
+              column4 = "<td>"+obj.appointment.timeSlot+"</td>\n";
+              var status = "Available";
+              column6 = ""
+              if(!obj.appointment.result){
+                  status = "Not Available";
+                  column6 = "<td><button type=\"button\" class=\"delete-btn\" onclick=deleteApp(\""+obj.appointment.id+"\")>Cancel</button></td>\n</tr>\n";
               }
-              column4 = "<td>"+status+"</td>\n";
-              row = column1+column2+column3+column4;
+              column5 = "<td>"+status+"</td>\n";
+              row = column1+column2+column3+column4+column5+column6;
               rows += row;
                   });
                   $("#app-table  tbody").append(rows);
@@ -130,8 +145,9 @@ $(document).ready(function() {
                         alert('error');
                     }
                 });
+    });
 
-                function timeConverter(UNIX_timestamp){
+    function timeConverter(UNIX_timestamp){
                     var a = new Date(UNIX_timestamp);
                     var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
                     var year = a.getFullYear();
@@ -147,7 +163,25 @@ $(document).ready(function() {
                 function capitalizeFirstLetter(string) {
                     return string.charAt(0).toUpperCase() + string.slice(1);
                 }
-    });
+
+    function deleteApp(app){
+        var c = confirm("Are you sure you want to cancel appointment?");
+        if (c) {
+            let data = {appID: app}
+            $.ajax({
+                    type: "DELETE",
+                    url: "{{ url_for('bookmedicaltest') }}",
+                    data: JSON.stringify(data),
+                    success: function(result) {
+                        window.alert("Appointment cancelled");
+                        location.reload();
+                },
+                    error: function(result) {
+                        alert('error');
+                    }
+                });
+        }
+    }
 
         function goBack() {
             window.history.back();

@@ -54,16 +54,18 @@
   
                 <div class="form-outline form-white mb-4">
                   <input type="email" name="email" id="typeEmailX" class="form-control form-control-lg" placeholder="Email"/>
+                  <div class='msg-error' id='email-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter password</div>
                 </div>
   
                 <div class="form-outline form-white">
                   <input type="password" id="typePasswordX" class="form-control form-control-lg" placeholder="Password"/>
+                  <div class='msg-error' id='password-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter password</div>
                 </div>
   
                 <p class="small mb-4"><a class="text-white-50" href="#!">Forgot password?</a></p>
   
-                <button id="login-btn" class="btn btn-outline-light btn-lg px-5 pt-2 mb-1" type="submit">Login</button>
-  
+                <button id="login-btn" class="btn btn-outline-light btn-lg px-5 mb-1" type="submit">Login</button>
+
               <div>
                 <p class="mb-0">Don't have an account? <a href="{{url_for('register')}}" class="text-white-50 fw-bold">Sign Up</a></p>
               </div>
@@ -80,6 +82,24 @@ const button = document.getElementById('login-btn');
 button.addEventListener('click', async _ => {
   var email = document.getElementById("typeEmailX").value;
   var password = document.getElementById("typePasswordX").value;
+
+  if(!(email.length))
+     {
+        document.getElementById('email-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("typeEmailX").focus();
+     } else{
+      document.getElementById('email-error').style.display = 'none';
+     }
+     if(!(password.length))
+     {
+        document.getElementById('password-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("typePasswordX").focus();
+     } else{
+      document.getElementById('password-error').style.display = 'none';
+     }
+     if (email != "" && password != "") {
   let data = {email: email, password: password}
   try {     
     const response = await fetch("{{ url_for('login') }}", {
@@ -87,17 +107,25 @@ button.addEventListener('click', async _ => {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(data),
     }).then((response) => {
-      if(response.redirected)
+      if(response.redirected) {
         window.location.href = response.url;
+      }
+      if(response.status == 400) {
+        response.json().then( json => {
+        window.alert(json.msg)
+      });
+      }
     });
     console.log('Completed!', response);
   } catch(err) {
     console.error(`Error: ${err}`);
   }
+}
 });
 
 function goBack() {
-            window.history.back();
+  window.location.href = "{{ url_for('index') }}";
+            //window.history.back();
         }
 </script>
     

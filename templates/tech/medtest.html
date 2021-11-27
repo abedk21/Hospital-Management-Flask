@@ -1,0 +1,269 @@
+<html>
+    <head>
+      <style>
+        .container {
+          min-height: 100vh;
+          background: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-flow: column;
+          padding-bottom: 60px;
+        }
+    
+        .container form {
+          background: rgb(228, 231, 245);
+          border-radius: 5px;
+          box-shadow: 0 10px 15px rgba(0, 0, 0, .1);
+          padding: 54px;
+          width: 600px;
+          padding-top: 10px;
+        }
+    
+        .container form .inputBox {
+          margin-top: 20px;
+        }
+    
+        .container form .inputBox span {
+          display: block;
+          color: #999;
+          padding-bottom: 5px;
+        }
+    
+        .container form .inputBox input,
+        .container form .inputBox select {
+          width: 100%;
+          padding: 10px;
+          border-radius: 10px;
+          border: 1px solid rgba(0, 0, 0, .3);
+          color: #444;
+        }
+    
+        .container form .flexbox {
+          display: flex;
+          gap: 15px;
+        }
+    
+        .container form .flexbox .inputBox {
+          flex: 1 1 150px;
+        }
+    
+        .container form .submit-btn {
+          width: 100%;
+          background: linear-gradient(45deg, blueviolet, deeppink);
+          margin-top: 20px;
+          padding: 10px;
+          font-size: 20px;
+          color: #fff;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: .2s linear;
+        }
+    
+        body {
+          width: 500px;
+          margin: 100 auto;
+         
+        }
+    
+        div.elem-group {
+          margin: 20px 0;
+        }
+    
+        div.elem-group.inlined {
+          width: 100%;
+          display: inline-block;
+          margin-left: 1%;
+        }
+    
+        label {
+          display: block;
+          font-family: 'Arial Hebrew';
+          padding-bottom: 10px;
+          font-size: 1.25em;
+        }
+    
+        input,
+        select,
+        textarea {
+          border-radius: 5px;
+          border: 1px solid #777;
+          box-sizing: border-box;
+          font-size: 1.25em;
+          font-family: 'Apple Symbols';
+          width: 100%;
+          padding: 10px;
+        }
+    
+        div.elem-group.inlined input {
+          width: 95%;
+          display: inline-block;
+        }
+    
+        textarea {
+          height: 200px;
+        }
+    
+        hr {
+          border: 1px dotted #ccc;
+        }
+    
+        button {
+          height: 50px;
+          background: orange;
+          border: none;
+          color: white;
+          font-size: 1.25em;
+          font-family: 'Arial Hebrew';
+          border-radius: 4px;
+          cursor: pointer;
+          margin-top: 15px;
+          padding: 15px;
+        }
+    
+        button:hover {
+          border: 2px solid black;
+        }
+    
+        h1 {
+          margin-bottom: 40px;
+          margin-left:145;
+          font-family:Arial;
+        }
+    
+        .btn.back {
+         margin-left: -250px;
+         margin-bottom: 55px;
+         max-height: 45px;
+         padding-top: 11px;
+         }
+         
+      </style>
+    
+      
+    </head>
+    
+    <body>
+      <button class = "btn back" onclick="goBack()">Go Back</button>
+      <div class="container">
+        <form id="myForm" action="app_booking" method="post" enctype="multipart/form-data">
+          <h1>Upload Medical Test Result</h1>
+
+          <div class="elem-group">
+            <label for="patient-selection">Patient</label>
+            <select id="patient-selection" name="select_patient" required>
+              <option value="">Choose Patient</option>
+            </select>
+          </div> 
+
+          <div class="elem-group">
+            <label for="app-selection">Appointment</label>
+            <select id="app-selection" name="select_app" required>
+              <option value="">Choose Appointment</option>
+            </select>
+          </div> 
+            <label for="file">Choose file to upload</label>
+          <input type="file" id="myFile" name="filename">
+    
+          <button id="submit-btn" type="submit">Upload</button>
+        </form>
+    
+      </div>
+    
+      <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+      <script type="text/JavaScript">
+var appointments;
+$(document).ready(function() {
+        
+        $.ajax({
+                    type: "GET",
+                    dataType: "JSON",
+                    url: "{{ url_for('medtestapps') }}",
+                    //data: JSON.stringify(data),
+                    success: function(result) {
+                        appointments = result;
+                      document.getElementById("patient-selection").innerHTML = "";
+                      var patientIDs = [];
+            var optionList = "<option value=\"\">Choose Patient</option>";
+            $.each(result, function(idx, obj) {
+                if(!obj.appointment.result){
+                if(!patientIDs.includes(obj.patient.id)){
+                    optionList += "<option value=\""+obj.patient.id+"\">"+capitalizeFirstLetter(obj.patient.firstName)+" "+capitalizeFirstLetter(obj.patient.lastName)+"</option>";
+                    patientIDs.push(obj.patient.id);
+                }
+            }              
+            });
+            document.getElementById("patient-selection").innerHTML = optionList;
+
+                    },
+                    error: function(result) {
+                        alert('error');
+                    }
+                });
+    });
+
+    document.getElementById('patient-selection').addEventListener('change', function() { 
+    document.getElementById("app-selection").innerHTML = "";
+            var optionList = "<option value=\"\">Choose Appointment</option>";
+            var patientID = document.getElementById('patient-selection').value;
+            $.each(appointments, function(idx, obj) {
+                if(obj.appointment.patientID == patientID && !obj.appointment.result) {
+              optionList += "<option value=\""+obj.appointment.id+"\">"+timeConverter(obj.appointment.date)+" ("+obj.appointment.timeSlot+")</option>";
+               }
+                  });
+            document.getElementById("app-selection").innerHTML = optionList;
+                });
+
+    function timeConverter(UNIX_timestamp){
+                    var a = new Date(UNIX_timestamp);
+                    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    var year = a.getFullYear();
+                    var month = months[a.getMonth()];
+                    var date = a.getDate();
+                    var hour = a.getHours();
+                    var min = a.getMinutes();
+                    var sec = a.getSeconds();
+                    var time = date + ' ' + month + ' ' + year;
+                    return time;
+                }
+
+                function capitalizeFirstLetter(string) {
+                    return string.charAt(0).toUpperCase() + string.slice(1);
+                }
+
+        const uploadbutton = document.getElementById('submit-btn');
+        $(uploadbutton).on("click", function(e) {
+            e.preventDefault();
+            //var file = new FormData();
+            var patientID = document.getElementById("patient-selection").value;
+            var appID = document.getElementById("app-selection").value;
+            var fd = new FormData();
+            var files = $('#myFile')[0].files;
+            //var file = document.getElementById("myFile").files[0];
+            fd.append('patientID',patientID);
+            fd.append('appID',appID);
+            fd.append('file',files[0]);
+            //let data = {patientID: patientID, appID: appID, file: fd}
+            $.ajax({
+                    type: "POST",
+                    url: "{{ url_for('medicaltest') }}",
+                    processData: false,
+                    contentType: false,
+                    data: fd,
+                    success: function(result) {
+                        alert('Medical Test uploaded');
+                        location.reload();
+                    },
+                    error: function(result) {
+                        alert('error');
+                    }
+                });
+        });
+
+        function goBack() {
+       window.history.back();
+       }
+      </script>
+    </body>
+    
+    </html>

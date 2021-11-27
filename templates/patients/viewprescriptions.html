@@ -71,6 +71,15 @@
             padding: 15px;
         }
 
+        .download-btn {
+            background: orange;
+            font-size: medium;
+            margin-bottom: 0px;
+            margin-top: 0px;
+            max-height: 45px;
+            padding-top: 5px;
+        }
+
         .styled-table th,
         .styled-table td {
             padding: 12px 45px;
@@ -81,17 +90,18 @@
 <body>
 
     <div class="header">
-        <h1>View Appointments</h1>
+        <h1>View Prescriptions</h1>
     </div>
     <button class="btn back" onclick="goBack()">Go Back</button>
     <table id="app-table" class="styled-table">
 
         <thead>
             <tr>
-                <th>Patient Name</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Prescription</th>
+                <th>Doctor Name</th>
+                <th>Department</th>
+                <th>Appointment Date</th>
+                <th>Appointment Time</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -112,17 +122,17 @@ $(document).ready(function() {
                     success: function(result) {
                         
             var rows = "";
+            //JSON.stringify(result)
             $.each(result, function(idx, obj) {
-              column1 = "<tr>\n<td>"+capitalizeFirstLetter(obj.patient.firstName)+" "+capitalizeFirstLetter(obj.patient.lastName)+"</td>\n";
-              column2 = "<td>"+timeConverter(obj.appointment.date)+"</td>\n";
-              column3 = "<td>"+obj.appointment.timeSlot+"</td>\n";
-              var status = "Uploaded";
-              if(!obj.appointment.prescription){
-                  status = "Not Uploaded";
-              }
-              column4 = "<td>"+status+"</td>\n";
-              row = column1+column2+column3+column4;
+                if(obj.appointment.prescription){
+              column1 = "<tr>\n<td>Dr. "+capitalizeFirstLetter(obj.doctor.firstName)+" "+capitalizeFirstLetter(obj.doctor.lastName)+"</td>\n";
+              column2 = "<td>"+capitalizeFirstLetter(obj.doctor.department)+"</td>\n"
+              column3 = "<td>"+timeConverter(obj.appointment.date)+"</td>\n";
+              column4 = "<td>"+obj.appointment.timeSlot+"</td>\n";
+            column5 = "<td><button type=\"button\" class=\"download-btn\" onclick=downloadPrescription(\""+obj.doctor.id+"\",\""+obj.appointment.id+"\",\""+obj.appointment.date+"\")>Download</button></td>\n</tr>\n";
+              row = column1+column2+column3+column4+column5;
               rows += row;
+                }
                   });
                   $("#app-table  tbody").append(rows);
                     },
@@ -130,8 +140,9 @@ $(document).ready(function() {
                         alert('error');
                     }
                 });
+    });
 
-                function timeConverter(UNIX_timestamp){
+    function timeConverter(UNIX_timestamp){
                     var a = new Date(UNIX_timestamp);
                     var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
                     var year = a.getFullYear();
@@ -144,10 +155,43 @@ $(document).ready(function() {
                     return time;
                 }
 
+    function timeConverter2(UNIX_timestamp){
+                    var a = new Date(UNIX_timestamp);
+                    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    var year = a.getFullYear();
+                    var month = ("0" + (a.getMonth() + 1)).slice(-2);
+                    var date = ("0" + a.getDate()).slice(-2);
+                    var hour = a.getHours();
+                    var min = a.getMinutes();
+                    var sec = a.getSeconds();
+                    var time = date + '' + month + '' + year;
+                    return time;
+                }
+
                 function capitalizeFirstLetter(string) {
                     return string.charAt(0).toUpperCase() + string.slice(1);
                 }
-    });
+
+    function downloadPrescription(doctorID, appID, date){
+            var url = "{{ url_for('downloadprescription') }}"+"?doctorID="+doctorID+"&appID="+appID;
+            downloadFile(url, date);  
+    }
+
+    function downloadFile(urlToSend, date) {
+     var req = new XMLHttpRequest();
+     req.open("GET", urlToSend, true);
+     req.responseType = "blob";
+     req.onload = function (event) {
+         var blob = req.response;
+         var fileName = "prescription_"+timeConverter2(date);
+         var link=document.createElement('a');
+         link.href=window.URL.createObjectURL(blob);
+         link.download=fileName;
+         link.click();
+     };
+
+     req.send();
+ }
 
         function goBack() {
             window.history.back();

@@ -54,9 +54,11 @@
                   <div class="row pt-1 pb-3">
                     <div id="fn" class="col">
                       <input id="firstName" type="text" class="form-control form-control-lg" placeholder="First name">
+                      <div class='msg-error' id='firstname-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter first name</div>
                     </div>
                     <div class="col">
                       <input id="lastName" type="text" class="form-control form-control-lg" placeholder="Last name">
+                      <div class='msg-error' id='lastname-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter last name</div>
                     </div>
                   </div>
                 </form>
@@ -67,28 +69,31 @@
                     <option value="1">Male</option>
                     <option value="2">Female</option>
                   </select>
+                  <div class='msg-error' id='gender-error' style='color:red;margin-bottom: 10px;display:none;'>Please select gender</div>
                 </div>
 
                 <div class="form-outline form-white mb-4 pt-1 pb-3">
                   <input type="number" name="age" id="typeAgeX" class="form-control form-control-lg"
                     placeholder="Age" />
+                    <div class='msg-error' id='age-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter age</div>
                 </div>
-
 
                 <div class="form-outline form-white mb-4 pt-1 pb-3">
                   <input type="text" name="phone" id="typePhoneX" class="form-control form-control-lg"
                     placeholder="Phone Number" />
+                    <div class='msg-error' id='phone-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter phone number</div>
                 </div>
-
 
                 <div class="form-outline form-white mb-4 pt-1 pb-3">
                   <input type="email" name="email" id="typeEmailX" class="form-control form-control-lg"
-                    placeholder="Email" />
+                    placeholder="Email" />   
+                    <div class='msg-error' id='email-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter email</div>                
                 </div>
 
                 <div class="form-outline form-white mb-4 pt-1 pb-3">
                   <input type="password" id="typePasswordX" class="form-control form-control-lg"
                     placeholder="Password" />
+                    <div class='msg-error' id='password-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter password</div>
                 </div>
 
                 <button id="register-btn" class="btn btn-outline-light btn-lg px-5 mb-1" type="submit">Sign Up</button>
@@ -116,8 +121,67 @@
       var age = document.getElementById("typeAgeX").value;
       var g = document.getElementById("inlineFormCustomSelectPref");
       var gender = g.options[g.selectedIndex].text;
-
       var role = "Patient";
+
+    var focusSet = false;
+    if(!(firstName.length))
+     {
+        document.getElementById('firstname-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("firstName").focus();
+     } else{
+      document.getElementById('firstname-error').style.display = 'none';
+     }
+     if(!(lastName.length))
+     {
+        document.getElementById('lastname-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("lastName").focus();
+     } else{
+      document.getElementById('lastname-error').style.display = 'none';
+     }
+     if((gender != "Male" || gender != "Female"))
+     {
+        document.getElementById('gender-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("inlineFormCustomSelectPref").focus();
+     } else{
+      document.getElementById('gender-error').style.display = 'none';
+     }
+     if(!(age.length))
+     {
+        document.getElementById('age-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("typeAgeX").focus();
+     } else{
+      document.getElementById('age-error').style.display = 'none';
+     }
+     if(!(phoneNumber.length))
+     {
+        document.getElementById('phone-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("typePhoneX").focus();
+     } else{
+      document.getElementById('phone-error').style.display = 'none';
+     }
+    if(!(email.length))
+     {
+        document.getElementById('email-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("typeEmailX").focus();
+     } else{
+      document.getElementById('email-error').style.display = 'none';
+     }
+     if(!(password.length))
+     {
+        document.getElementById('password-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("typePasswordX").focus();
+     } else{
+      document.getElementById('password-error').style.display = 'none';
+     }
+
+      if (email != "" && password != "" && firstName != "" && lastName != "" && phoneNumber != "" && age > 0 && (gender == "Male" || gender == "Female")) {
       let data = { email: email, password: password, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber, age: age, gender: gender, role: role };
       try {
         const response = await fetch("{{ url_for('register') }}", {
@@ -125,17 +189,25 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         }).then((response) => {
-      if(response.redirected)
+      if(response.redirected) {
         window.location.href = response.url;
+      }
+      if(response.status == 400) {
+        response.json().then( json => {
+        window.alert(json.msg)
+      });
+      }
     });;
         console.log('Completed!', response);
       } catch (err) {
         console.error(`Error: ${err}`);
       }
+    }
     });
   
         function goBack() {
-            window.history.back();
+          window.location.href = "{{ url_for('index') }}";
+            //window.history.back();
         }
 
   </script>

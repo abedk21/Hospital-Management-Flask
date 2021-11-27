@@ -173,13 +173,6 @@
         <label for="time-selection">Select Time</label>
         <select id="time-selection" name="time_preference" required>
           <option value="">Choose Time Slot</option>
-          <option value="">10-11 AM</option>
-          <option value="adjoining">11-12 AM</option>
-          <option value="adjacent">12-1 PM</option>
-          <option value="adjacent">1-2 PM</option>
-          <option value="adjacent">2-3 PM</option>
-          <option value="adjacent">3-4 PM</option>
-          <option value="adjacent">4-5 PM</option>
         </select>
       </div>
 
@@ -209,7 +202,7 @@ $(document).ready(function() {
                       document.getElementById("department-selection").innerHTML = "";
             var optionList = "<option value=\"\">Choose Department</option>";
             $.each(result, function(idx, obj) {
-              optionList += "<option value=\"\">"+obj.department+"</option>";
+              optionList += "<option value=\"\">"+capitalizeFirstLetter(obj.department)+"</option>";
                   });
             document.getElementById("department-selection").innerHTML = optionList;
                     },
@@ -251,24 +244,25 @@ $(document).ready(function() {
       var dep = e.options[e.selectedIndex].text;
             $.each(doctors, function(idx, obj) {
               if(obj.department == dep) {
-              optionList += "<option value=\""+obj.id+"\">Dr. "+obj.firstName+" "+obj.lastName+"</option>";
+              optionList += "<option value=\""+obj.id+"\">Dr. "+capitalizeFirstLetter(obj.firstName)+" "+capitalizeFirstLetter(obj.lastName)+"</option>";
               }
                   });
                   document.getElementById("doctor-selection").innerHTML = optionList;
   });
-
+  var timeSlots = ["10-11 AM","11-12 AM","12-1 PM","1-2 PM","2-3 PM","3-4 PM","4-5 PM"];
+    var booked = [];
   document.getElementById('doctor-selection').addEventListener('change', function() {
     var doctorID = document.getElementById('doctor-selection').value;
     var optionList = "<option value=\"\">Choose Time Slot</option>";
-    var date = document.getElementById('checkin-date').value;
-      var timeSlots = ["10-11 AM","11-12 AM","12-1 PM","1-2 PM","2-3 PM","3-4 PM","4-5 PM"];
-      var booked = [];
+    var date = document.getElementById('checkin-date').value+"T00:00:00";
+    booked.splice(0, booked.length);
             $.each(appointments, function(idx, obj) {
-              if(timeConverter(obj.date.$date) == timeConverter(date) && obj.doctorID == doctorID) {
+               if(timeConverter(obj.date) == timeConverter(date) && obj.doctorID == doctorID) {
                 if (timeSlots.includes(obj.timeSlot) && !booked.includes(obj.timeSlot)) {
                   booked.push(obj.timeSlot);
                 }
-              }
+               }
+              
             });
             $.each(timeSlots, function(idx, obj) {
                 if (!booked.includes(obj)) {
@@ -292,7 +286,49 @@ $(document).ready(function() {
                     var time = date + ' ' + month + ' ' + year;
                     return time;
                 }
-  });
+          });
+
+  document.getElementById('checkin-date').addEventListener('change', function() {
+    var doctorID = document.getElementById('doctor-selection').value;
+    var optionList = "<option value=\"\">Choose Time Slot</option>";
+    var date = document.getElementById('checkin-date').value+"T00:00:00";
+    booked.splice(0, booked.length);
+            $.each(appointments, function(idx, obj) {
+               if(timeConverter(obj.date) == timeConverter(date) && obj.doctorID == doctorID) {
+                if (timeSlots.includes(obj.timeSlot) && !booked.includes(obj.timeSlot)) {
+                  booked.push(obj.timeSlot);
+                }
+               }
+              
+            });
+            $.each(timeSlots, function(idx, obj) {
+                if (!booked.includes(obj)) {
+                  optionList += "<option value=\"\">"+obj+"</option>";
+                }
+            });
+            if(booked.length == 7) {
+              optionList = "<option value=\"\">No Available Time Slots</option>";
+            }
+            document.getElementById("time-selection").innerHTML = optionList;
+
+            function timeConverter(UNIX_timestamp){
+                    var a = new Date(UNIX_timestamp);
+                    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    var year = a.getFullYear();
+                    var month = months[a.getMonth()];
+                    var date = a.getDate();
+                    var hour = a.getHours();
+                    var min = a.getMinutes();
+                    var sec = a.getSeconds();
+                    var time = date + ' ' + month + ' ' + year;
+                    return time;
+                }
+          });
+
+          function capitalizeFirstLetter(string) {
+                    return string.charAt(0).toUpperCase() + string.slice(1);
+                }
+
 
   const submitbutton = document.getElementById('submit-btn');
         $(submitbutton).on("click", function(e) {
@@ -302,13 +338,14 @@ $(document).ready(function() {
             var timeSlot = e.options[e.selectedIndex].text;
             var date = document.getElementById("checkin-date").value;
             var note = String(document.getElementById("message").value);
-            let data = {doctorID: doctorID, timeSlot: timeSlot, date: date, note: note}
+            let data = {doctorID: doctorID, timeSlot: timeSlot, date: date+"T00:00:00", note: note}
             $.ajax({
                     type: "POST",
-                    url: "{{ url_for('book_app') }}",
+                    url: "{{ url_for('appointment') }}",
                     data: JSON.stringify(data),
                     success: function(result) {
                         alert('Appointment Booked successfully');
+                        location.reload();
                     },
                     error: function(result) {
                         alert('error');

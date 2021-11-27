@@ -40,13 +40,6 @@ def make_unique(string):
     ident = uuid4().__str__()
     return f"{ident}-{string}"
 
-def generateReturnJson(status, msg):
-    retJson = {
-        "status": status,
-        "msg": msg
-    }
-    return retJson
-
 def UserExists(email):
     result = User.objects(email=email)
     if not result:
@@ -61,18 +54,23 @@ def index():
     headers = {'Content-Type': 'text/html'}
     return make_response(render_template('index.html'),200,headers)
 
+@app.route("/contactus")
+def contact():
+    return render_template("contact_us.html")
+
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         content = request.get_json(force=True)
         email = content['email']
         if UserExists(email):
-            return {'msg': "User already exists"}, 400
+            headers = {'Content-Type': 'application/json'}
+            return make_response(jsonify({"msg": "User already exists"}), 400, headers)
         password = content['password']
         role = content['role']
         hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
         department = ""
-        if(role == "Doctor"):
+        if(role == "Doctor" or role == "Labop"):
             department = content['department']
         newBody = {
             "email": email,
@@ -97,14 +95,14 @@ def register():
 
 def verifyCredentials(email, password):
     if not UserExists(email):
-        return generateReturnJson(400, "Email doesn't exist"), True
+        return True
 
     correct_pw = verifyPw(email, password)
 
     if not correct_pw:
-        return generateReturnJson(400, "The password you entered is incorrect"), True
+        return True
 
-    return None, False
+    return False
 
 def verifyPw(email, password):
     if not UserExists(email):
@@ -129,9 +127,10 @@ def login():
         content = request.get_json(force=True)
         email = content['email']
         password = content["password"]
-        retJson, error = verifyCredentials(email, password)
+        error = verifyCredentials(email, password)
         if error:
-            return retJson, 400
+            headers = {'Content-Type': 'application/json'}
+            return make_response(jsonify({"msg": "Wrong email or password"}), 400, headers)
         else:
             user = User.objects(email=email).first()
             login_user(user)
@@ -161,62 +160,146 @@ def home():
         else:
             return make_response(render_template('tech/techdash.html'),200,headers)
 
+@app.route("/viewprescriptions", methods=['GET', 'POST'])
+@login_required
+def viewprescriptions():
+    if request.method == 'GET':
+        if current_user.role == "Patient":
+            headers = {'Content-Type': 'text/html'}
+            return make_response(render_template('patients/viewprescriptions.html'),200,headers)
+        if current_user.role == "Doctor":
+            headers = {'Content-Type': 'text/html'}
+            return make_response(render_template('doctors/viewprescriptions.html'),200,headers)
+
+@app.route("/viewtestresults", methods=['GET', 'POST'])
+@login_required
+def viewtestresults():
+    if request.method == 'GET':
+        if current_user.role == "Patient":
+            headers = {'Content-Type': 'text/html'}
+            return make_response(render_template('patients/viewtestresult.html'),200,headers)
+        if current_user.role == "Labop":
+            headers = {'Content-Type': 'text/html'}
+            return make_response(render_template('tech/viewtestresult.html'),200,headers)
+
 @app.route("/prescription", methods=['GET', 'POST'])
-# @login_required
+@login_required
 def prescription():
     if request.method == 'GET':
-        email = request.form['email']
-        user = User.objects(email=email).first()
-        id = str(user.id)
-        prescriptions = Prescription.objects(patientID=id).to_json()
-        return prescriptions, 200
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('doctors/prescription.html'),200,headers)
 
     if request.method == 'POST':
+        # print("request: ",request.get_json(force=True))
         file = request.files['file']
         patientID = request.form['patientID']
-        doctorID = request.form['doctorID']
+        doctorID = current_user.id
+        appID = request.form['appID']
         filename = uuid4().__str__()
         if file and allowed_file(file.filename):
             original_filename = secure_filename(file.filename)
             unique_filename = make_unique(original_filename)
-            path = os.path.join(app.config['UPLOAD_FOLDER_PRESCRIPTIONS'], patientID, doctorID)
+            path = os.path.join(app.config['UPLOAD_FOLDER_PRESCRIPTIONS'], patientID, str(doctorID))
             try:
                 os.makedirs(path, exist_ok = True)
                 print("Directory '%s' created successfully" % path)
             except OSError as error:
                 print("Directory '%s' can not be created" % path)
             file.save(os.path.join(path, unique_filename))
-            prescription = Prescription(patientID=patientID, doctorID=doctorID, filename=unique_filename)
+            prescription = Prescription(patientID=patientID, doctorID=str(doctorID), appID=appID, filename=unique_filename)
             prescription.save()
+            Appointment.objects(id = appID).update(
+                prescription = True
+                )
             return redirect(url_for('home'))
         else:
             flash('Invalid Upload only txt, pdf, png, jpg, jpeg, gif') 
         return redirect('/') 
 
-@app.route("/prescription/<filename>", methods=['GET'])
-# @login_required
-def downloadPrescription(filename):
-    patientID = request.form['patientID']
-    doctorID = request.form['doctorID']
-    path = os.path.join(app.config['UPLOAD_FOLDER_PRESCRIPTIONS'], patientID, doctorID, filename)
-    return send_file(path)
+@app.route("/getprescription", methods=['GET'])
+@login_required
+def downloadprescription():
+    if current_user.role == "Patient":
+        patientID = str(current_user.id)
+        doctorID = request.args.get('doctorID')
+        appID = request.args.get('appID')
+        filename = Prescription.objects(appID=appID).first().filename
+        path = os.path.join(app.config['UPLOAD_FOLDER_PRESCRIPTIONS'], patientID, doctorID, filename)
+        return send_file(path)
+    if current_user.role == "Doctor":
+        doctorID = str(current_user.id)
+        patientID = request.args.get('patientID')
+        appID = request.args.get('appID')
+        filename = Prescription.objects(appID=appID).first().filename
+        path = os.path.join(app.config['UPLOAD_FOLDER_PRESCRIPTIONS'], patientID, doctorID, filename)
+        return send_file(path)
+
+@app.route("/deleteprescription", methods=['DELETE'])
+@login_required
+def deleteprescription():
+    if current_user.role == "Doctor":
+        content = request.get_json(force=True)
+        doctorID = str(current_user.id)
+        patientID = content['patientID']
+        appID = content['appID']
+        prescription = Prescription.objects(appID=appID).first()
+        filename = prescription.filename
+        prescription.delete()
+        path = os.path.join(app.config['UPLOAD_FOLDER_PRESCRIPTIONS'], patientID, doctorID, filename)
+        if os.path.exists(path):
+            os.remove(path)
+        else:
+            print("The file does not exist")
+        Appointment.objects(id = appID).update(
+            prescription = False
+        )
+        return "",200
+
+@app.route("/deletemedicaltest", methods=['DELETE'])
+@login_required
+def deletemedtest():
+    if current_user.role == "Labop":
+        content = request.get_json(force=True)
+        labopID = str(current_user.id)
+        patientID = content['patientID']
+        appID = content['appID']
+        medtest = MedicalTest.objects(appID=appID).first()
+        filename = medtest.filename
+        medtest.delete()
+        path = os.path.join(app.config['UPLOAD_FOLDER_MEDICALTESTS'], patientID, labopID, filename)
+        if os.path.exists(path):
+            os.remove(path)
+        else:
+            print("The file does not exist")
+        MedicalTestApp.objects(id = appID).update(
+            result = False
+        )
+        return "",200
+
+@app.route("/viewmedicalappointments", methods=['GET', 'POST'])
+@login_required
+def viewmedtestapps():
+    if request.method == 'GET':
+        if current_user.role == "Labop":
+            headers = {'Content-Type': 'text/html'}
+            return make_response(render_template('tech/bookings.html'),200,headers)
 
 @app.route("/medicaltest", methods=['GET', 'POST'])
 @login_required
-def booktest():
+def medicaltest():
     if request.method == 'GET':
-        # email = request.form['email']
-        # user = User.objects(email=email).first()
-        # id = str(user.id)
-        # medicaltests = MedicalTest.objects(patientID=id).to_json()
-        # return medicaltests, 200
-        headers = {'Content-Type': 'text/html'}
-        return make_response(render_template('patients/bookmedtest.html'),200,headers)
+        if current_user.role == "Patient":
+            headers = {'Content-Type': 'text/html'}
+            return make_response(render_template('patients/bookmedtest.html'),200,headers)
+        if current_user.role == "Labop":
+            headers = {'Content-Type': 'text/html'}
+            return make_response(render_template('tech/medtest.html'),200,headers)
 
     if request.method == 'POST':
         file = request.files['file']
         patientID = request.form['patientID']
-        labopID = request.form['labopID']
+        labopID = str(current_user.id)
+        appID = request.form['appID']
         filename = uuid4().__str__()
         if file and allowed_file(file.filename):
             original_filename = secure_filename(file.filename)
@@ -228,20 +311,33 @@ def booktest():
             except OSError as error:
                 print("Directory '%s' can not be created" % path)
             file.save(os.path.join(path, unique_filename))
-            medicaltests = MedicalTest(patientID=patientID, labopID=labopID, filename=unique_filename)
+            medicaltests = MedicalTest(patientID=patientID, labopID=labopID, appID=appID, filename=unique_filename)
             medicaltests.save()
+            MedicalTestApp.objects(id = appID).update(
+                result = True
+            )
             return redirect('/')
         else:
             flash('Invalid Upload only txt, pdf, png, jpg, jpeg, gif') 
         return redirect('/')
 
-@app.route("/medicaltest/<filename>", methods=['GET'])
+@app.route("/getmedicaltest", methods=['GET'])
 @login_required
-def downloadMedicalTest(filename):
-    patientID = request.form['patientID']
-    labopID = request.form['labopID']
-    path = os.path.join(app.config['UPLOAD_FOLDER_MEDICALTESTS'], patientID, labopID, filename)
-    return send_file(path)
+def downloadMedicalTest():
+    if current_user.role == "Patient":
+        patientID = str(current_user.id)
+        labopID = request.args.get('labopID')
+        appID = request.args.get('appID')
+        filename = MedicalTest.objects(appID=appID).first().filename
+        path = os.path.join(app.config['UPLOAD_FOLDER_MEDICALTESTS'], patientID, labopID, filename)
+        return send_file(path)
+    if current_user.role == "Labop":
+        labopID = str(current_user.id)
+        patientID = request.args.get('patientID')
+        appID = request.args.get('appID')
+        filename = MedicalTest.objects(appID=appID).first().filename
+        path = os.path.join(app.config['UPLOAD_FOLDER_MEDICALTESTS'], patientID, labopID, filename)
+        return send_file(path)
 
 @app.route("/bookappointment", methods=['GET', 'POST'])
 @login_required
@@ -250,7 +346,7 @@ def book_app():
         headers = {'Content-Type': 'text/html'}
         return make_response(render_template('patients/book_app.html'),200,headers)
 
-@app.route("/appointment", methods=['GET', 'POST'])
+@app.route("/appointment", methods=['GET', 'POST', 'DELETE'])
 @login_required
 def appointment():
     if request.method == 'GET':
@@ -258,12 +354,39 @@ def appointment():
         if current_user.role == "Patient":
             return make_response(render_template('patients/bookings.html'),200,headers)
         if current_user.role == "Doctor":
-            return make_response(render_template('doctor/bookings.html'),200,headers)
+            return make_response(render_template('doctors/bookings.html'),200,headers)
     if request.method == 'POST':
         content = request.get_json(force=True)
-        Appointment(patientID=str(current_user.id),doctorID=content['doctorID'],date=content['date'],timeSlot=content['timeSlot'],note=content['note']).save()
+        Appointment(patientID=str(current_user.id),doctorID=content['doctorID'],prescription=False,date=content['date'],timeSlot=content['timeSlot'],note=content['note']).save()
         headers = {'Content-Type': 'text/html'}
         return make_response("",200,headers)
+    if request.method == 'DELETE':
+        content = request.get_json(force=True)
+        appointment = Appointment.objects(id=content['appID'])
+        appointment.delete()
+        headers = {'Content-Type': 'application/json'}
+        return make_response(jsonify({"msg": "Appointment cancelled"}), 200, headers)
+
+@app.route("/bookmedicaltest", methods=['GET', 'POST', 'DELETE'])
+@login_required
+def bookmedicaltest():
+    if request.method == 'GET':
+        headers = {'Content-Type': 'text/html'}
+        if current_user.role == "Patient":
+            return make_response(render_template('patients/medtestbookings.html'),200,headers)
+        if current_user.role == "Labop":
+            return make_response(render_template('doctors/medtestbookings.html'),200,headers)
+    if request.method == 'POST':
+        content = request.get_json(force=True)
+        MedicalTestApp(patientID=str(current_user.id),labopID=content['labopID'],result=False,date=content['date'],timeSlot=content['timeSlot'],note=content['note']).save()
+        headers = {'Content-Type': 'text/html'}
+        return make_response("",200,headers)
+    if request.method == 'DELETE':
+        content = request.get_json(force=True)
+        appointment = MedicalTestApp.objects(id=content['appID'])
+        appointment.delete()
+        headers = {'Content-Type': 'application/json'}
+        return make_response(jsonify({"msg": "Medical Test Booking Cancelled"}), 200, headers)
 
 @app.route("/appointments", methods=['GET', 'POST'])
 @login_required
@@ -275,27 +398,61 @@ def appointments():
             for appointment in appointments:
                 patient = User.objects(id=str(appointment.patientID)).first()
                 newBody.append({
-                "appointment": appointment,
-                "patient": patient
+                "appointment": json.loads(appointment.to_json()),
+                "patient": json.loads(patient.to_json())
                 })
             headers = {'Content-Type': 'application/json'}
-            return make_response(jsonify(newBody),200,headers)
+            return make_response(json.dumps(newBody),200,headers)
         if current_user.role == "Patient":
             appointments = Appointment.objects(patientID=str(current_user.id))
             for appointment in appointments:
                 doctor = User.objects(id=str(appointment.doctorID)).first()
                 newBody.append({
-                "appointment": appointment,
-                "doctor": doctor
+                "appointment": json.loads(appointment.to_json()),
+                "doctor": json.loads(doctor.to_json())
                 })
             headers = {'Content-Type': 'application/json'}
-            return make_response(jsonify(newBody),200,headers)
+            return make_response(json.dumps(newBody),200,headers)
+
+@app.route("/medtestapps", methods=['GET', 'POST'])
+@login_required
+def medtestapps():
+    if request.method == 'GET':
+        newBody = []
+        if current_user.role == "Labop":
+            appointments = MedicalTestApp.objects(labopID=str(current_user.id))
+            for appointment in appointments:
+                patient = User.objects(id=str(appointment.patientID)).first()
+                newBody.append({
+                "appointment": json.loads(appointment.to_json()),
+                "patient": json.loads(patient.to_json())
+                })
+            headers = {'Content-Type': 'application/json'}
+            return make_response(json.dumps(newBody),200,headers)
+        if current_user.role == "Patient":
+            appointments = MedicalTestApp.objects(patientID=str(current_user.id))
+            for appointment in appointments:
+                labop = User.objects(id=str(appointment.labopID)).first()
+                newBody.append({
+                "appointment": json.loads(appointment.to_json()),
+                "labop": json.loads(labop.to_json())
+                })
+            headers = {'Content-Type': 'application/json'}
+            return make_response(json.dumps(newBody),200,headers)     
 
 @app.route("/checkapp", methods=['GET', 'POST'])
 @login_required
 def check_app():
     if request.method == 'GET':
         appointments = Appointment.objects(patientID=str(current_user.id))
+        headers = {'Content-Type': 'application/json'}
+        return make_response(appointments.to_json(),200,headers)
+
+@app.route("/checkmedtest", methods=['GET', 'POST'])
+@login_required
+def check_medtest():
+    if request.method == 'GET':
+        appointments = MedicalTestApp.objects(patientID=str(current_user.id))
         headers = {'Content-Type': 'application/json'}
         return make_response(appointments.to_json(),200,headers)
 
@@ -335,12 +492,33 @@ def departments():
         headers = {'Content-Type': 'application/json'}
         return make_response(departments.to_json(),200,headers)
 
+@app.route("/testtypes", methods=['GET', 'POST'])
+def testtypes():
+    if request.method == 'POST':
+        content = request.get_json(force=True)
+        testtypes = content['testtypes']
+        for testtype in testtypes:
+            TestType(testtype=testtype).save()
+            headers = {'Content-Type': 'application/json'}
+        return make_response("",200,headers)
+    if request.method == 'GET':
+        testtypes = TestType.objects()
+        headers = {'Content-Type': 'application/json'}
+        return make_response(testtypes.to_json(),200,headers)
+
 @app.route("/doctors", methods=['GET', 'POST'])
 def doctors():
     if request.method == 'GET':
         doctors = User.objects(role='Doctor')
         headers = {'Content-Type': 'application/json'}
         return make_response(doctors.to_json(),200,headers)
+
+@app.route("/labops", methods=['GET', 'POST'])
+def labops():
+    if request.method == 'GET':
+        labops = User.objects(role='Labop')
+        headers = {'Content-Type': 'application/json'}
+        return make_response(labops.to_json(),200,headers)
 
 @app.route("/update", methods=['PATCH'])
 @login_required

@@ -91,7 +91,7 @@
                 <th>Patient Name</th>
                 <th>Date</th>
                 <th>Time</th>
-                <th>Prescription</th>
+                <th>Medical Test Result</th>
             </tr>
         </thead>
         <tbody>
@@ -107,7 +107,7 @@ $(document).ready(function() {
         $.ajax({
                     type: "GET",
                     dataType: "JSON",
-                    url: "{{ url_for('appointments') }}",
+                    url: "{{ url_for('medtestapps') }}",
                     //data: JSON.stringify(data),
                     success: function(result) {
                         
@@ -117,7 +117,7 @@ $(document).ready(function() {
               column2 = "<td>"+timeConverter(obj.appointment.date)+"</td>\n";
               column3 = "<td>"+obj.appointment.timeSlot+"</td>\n";
               var status = "Uploaded";
-              if(!obj.appointment.prescription){
+              if(!obj.appointment.result){
                   status = "Not Uploaded";
               }
               column4 = "<td>"+status+"</td>\n";
