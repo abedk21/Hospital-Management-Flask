@@ -150,12 +150,9 @@
           <h1>Request A Bed</h1>
           <hr>    
           <div class="elem-group">
-            <label for="room-selection">Select Ward</label>
-            <select id="room-selection" name="room_preference" required>
+            <label for="ward-selection">Select Ward</label>
+            <select id="ward-selection" name="ward_preference" required>
               <option value="" selected disabled hidden>Choose Ward</option>
-              <option value="harry">General</option>
-              <option value="hermoine">Private Room</option>
-              <option value="ron">Private Room With AC</option>
             </select>
           </div>
     
@@ -167,8 +164,8 @@
           </div>
     
           <div class="elem-group">
-            <label for="room-selection">Select Admission Time</label>
-            <select id="room-selection" name="room_preference" required>
+            <label for="time-selection">Select Admission Time</label>
+            <select id="time-selection" name="time_preference" required>
               <option value="" selected disabled hidden>Choose Time Slot</option>
               <option value="">12-11 AM</option>
               <option value="adjoining">12-11 PM</option>
@@ -180,12 +177,153 @@
             <textarea id="message" name="visitor_message" placeholder="Tell us anything else that might be important."
               required></textarea>
           </div>
-          <button type="submit">Book Test</button>
+          <button id="submit-btn" type="submit">Book Test</button>
         </form>
     
       </div>
     
-      <script>
+      <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+      <script type="text/JavaScript">
+    var appointments;
+    $(document).ready(function() {
+
+      $.ajax({
+                    type: "GET",
+                    dataType: "JSON",
+                    url: "{{ url_for('wards') }}",
+                    //data: JSON.stringify(data),
+                    success: function(result) {
+                      document.getElementById("ward-selection").innerHTML = "";
+            var optionList = "<option value=\"\" selected disabled hidden>Choose Ward</option>";
+            $.each(result, function(idx, obj) {
+              optionList += "<option value=\"\">"+capitalizeFirstLetter(obj.ward)+"</option>";
+                  });
+            document.getElementById("ward-selection").innerHTML = optionList;
+                    },
+                    error: function(result) {
+                        alert('error');
+                    }
+                });
+                    $.ajax({
+                        type: "GET",
+                        dataType: "JSON",
+                        url: "{{ url_for('checkbedrequests') }}",
+                        //data: JSON.stringify(data),
+                        success: function(result) {
+                          appointments = result
+                        },
+                        error: function(result) {
+                            alert('error');
+                        }
+                    });
+        });
+    
+      var timeSlots = ["12-11 AM", "12-11 PM"];
+        var booked = [];
+      document.getElementById('ward-selection').addEventListener('change', function() {
+        var w = document.getElementById('ward-selection');
+        var ward = w.options[w.selectedIndex].text;
+        var optionList = "<option value=\"\" selected disabled hidden>Choose Time Slot</option>";
+        var date = document.getElementById('checkin-date').value+"T00:00:00";
+        booked.splice(0, booked.length);
+                $.each(appointments, function(idx, obj) {
+                   if(timeConverter(obj.date) == timeConverter(date) && obj.ward == ward) {
+                    if (timeSlots.includes(obj.timeSlot) && !booked.includes(obj.timeSlot)) {
+                      booked.push(obj.timeSlot);
+                    }
+                   }
+                  
+                });
+                $.each(timeSlots, function(idx, obj) {
+                    if (!booked.includes(obj)) {
+                      optionList += "<option value=\"\">"+obj+"</option>";
+                    }
+                });
+                if(booked.length == 2) {
+                  optionList = "<option value=\"\">No Available Time Slots</option>";
+                }
+                document.getElementById("time-selection").innerHTML = optionList;
+    
+                function timeConverter(UNIX_timestamp){
+                        var a = new Date(UNIX_timestamp);
+                        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                        var year = a.getFullYear();
+                        var month = months[a.getMonth()];
+                        var date = a.getDate();
+                        var hour = a.getHours();
+                        var min = a.getMinutes();
+                        var sec = a.getSeconds();
+                        var time = date + ' ' + month + ' ' + year;
+                        return time;
+                    }
+              });
+    
+      document.getElementById('checkin-date').addEventListener('change', function() {
+        var w = document.getElementById('ward-selection');
+        var ward = w.options[w.selectedIndex].text;
+        var optionList = "<option value=\"\" selected disabled hidden>Choose Time Slot</option>";
+        var date = document.getElementById('checkin-date').value+"T00:00:00";
+        booked.splice(0, booked.length);
+                $.each(appointments, function(idx, obj) {
+                   if(timeConverter(obj.date) == timeConverter(date) && obj.ward == ward) {
+                    if (timeSlots.includes(obj.timeSlot) && !booked.includes(obj.timeSlot)) {
+                      booked.push(obj.timeSlot);
+                    }
+                   }
+                  
+                });
+                $.each(timeSlots, function(idx, obj) {
+                    if (!booked.includes(obj)) {
+                      optionList += "<option value=\"\">"+obj+"</option>";
+                    }
+                });
+                if(booked.length == 2) {
+                  optionList = "<option value=\"\">No Available Time Slots</option>";
+                }
+                document.getElementById("time-selection").innerHTML = optionList;
+    
+                function timeConverter(UNIX_timestamp){
+                        var a = new Date(UNIX_timestamp);
+                        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                        var year = a.getFullYear();
+                        var month = months[a.getMonth()];
+                        var date = a.getDate();
+                        var hour = a.getHours();
+                        var min = a.getMinutes();
+                        var sec = a.getSeconds();
+                        var time = date + ' ' + month + ' ' + year;
+                        return time;
+                    }
+              });
+    
+              function capitalizeFirstLetter(string) {
+                        return string.charAt(0).toUpperCase() + string.slice(1);
+                    }
+    
+    
+      const submitbutton = document.getElementById('submit-btn');
+            $(submitbutton).on("click", function(e) {
+                e.preventDefault();
+                var w = document.getElementById("ward-selection");
+                var ward = w.options[w.selectedIndex].text;
+                var e = document.getElementById("time-selection");
+                var timeSlot = e.options[e.selectedIndex].text;
+                var date = document.getElementById("checkin-date").value;
+                var note = String(document.getElementById("message").value);
+                let data = {ward: ward, timeSlot: timeSlot, date: date+"T00:00:00", note: note}
+                $.ajax({
+                        type: "POST",
+                        url: "{{ url_for('requestbed') }}",
+                        data: JSON.stringify(data),
+                        success: function(result) {
+                            alert('Bed requested successfully');
+                            location.reload();
+                        },
+                        error: function(result) {
+                            alert('error');
+                        }
+                    });
+            });
         function goBack() {
        window.history.back();
        }

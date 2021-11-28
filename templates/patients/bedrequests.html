@@ -1,0 +1,180 @@
+<head>
+    <style>
+        .styled-table {
+            border-collapse: collapse;
+            margin-top: 125px;
+            font-size: 0.8em;
+            font-family: sans-serif;
+            min-width: 90%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+            margin-left: 55px;
+        }
+
+        .styled-table thead tr {
+            background-color: #009879;
+            color: #ffffff;
+            text-align: left;
+        }
+
+        .styled-table th,
+        .styled-table td {
+            padding: 12px 15px;
+        }
+
+        .styled-table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+
+        .styled-table tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+
+        .styled-table tbody tr:last-of-type {
+            border-bottom: 2px solid #009879;
+        }
+
+        .styled-table tbody tr.active-row {
+            font-weight: bold;
+            color: #009879;
+        }
+
+        .header {
+            padding: 5px;
+            text-align: center;
+            background: #009879;
+            color: white;
+            font-size: 22px;
+        }
+
+        h1 {
+            font-family: Apple Symbols;
+
+        }
+
+        .btn.back {
+
+            margin-bottom: -50px;
+            max-height: 45px;
+            padding-top: 5px;
+        }
+
+        button {
+            height: 30px;
+            background: orange;
+            border: none;
+            color: white;
+            font-size: 1.25em;
+            font-family: 'Arial Hebrew';
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 50px;
+            padding: 15px;
+        }
+
+        .delete-btn {
+            background: red;
+            font-size: medium;
+            margin-bottom: 0px;
+            margin-top: 0px;
+            max-height: 45px;
+            padding-top: 5px;
+        }
+
+        .styled-table th,
+        .styled-table td {
+            padding: 12px 45px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Bed Requests</h1>
+    </div>
+    <button class="btn back" onclick="goBack()">Go Back</button>
+    <table id="app-table" class="styled-table">
+
+        <thead>
+            <tr>
+                <th>Date & Time</th>
+                <th>Ward</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- and so on... -->
+        </tbody>
+    </table>
+
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <script type="text/JavaScript">
+
+$(document).ready(function() {
+        
+        $.ajax({
+                    type: "GET",
+                    dataType: "JSON",
+                    url: "{{ url_for('getbedrequests') }}",
+                    //data: JSON.stringify(data),
+                    success: function(result) {
+                        
+            var rows = "";
+            //JSON.stringify(result)
+            $.each(result, function(idx, obj) {
+                column1 = "<tr>\n<td><p style=\"width:120%;\">"+timeConverter(obj.date)+" ("+obj.timeSlot+")</p></td>\n";
+              column2 = "<td><p style=\"width:120%;\">"+capitalizeFirstLetter(obj.ward)+"</p></td>\n";
+                  column3 = "<td><button type=\"button\" class=\"delete-btn\" onclick=deleteApp(\""+obj.id+"\")>Cancel</button></td>\n</tr>\n";
+              row = column1+column2+column3;
+              rows += row;
+                  });
+                  $("#app-table  tbody").append(rows);
+                    },
+                    error: function(result) {
+                        alert('error');
+                    }
+                });
+    });
+
+    function timeConverter(UNIX_timestamp){
+                    var a = new Date(UNIX_timestamp);
+                    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    var year = a.getFullYear();
+                    var month = months[a.getMonth()];
+                    var date = a.getDate();
+                    var hour = a.getHours();
+                    var min = a.getMinutes();
+                    var sec = a.getSeconds();
+                    var time = date + ' ' + month + ' ' + year;
+                    return time;
+                }
+
+                function capitalizeFirstLetter(string) {
+                    return string.charAt(0).toUpperCase() + string.slice(1);
+                }
+
+    function deleteApp(id){
+        var c = confirm("Are you sure you want to cancel bed request?");
+        if (c) {
+            let data = {id: id}
+            $.ajax({
+                    type: "DELETE",
+                    url: "{{ url_for('requestbed') }}",
+                    data: JSON.stringify(data),
+                    success: function(result) {
+                        window.alert("Bed Request cancelled");
+                        location.reload();
+                },
+                    error: function(result) {
+                        alert('error');
+                    }
+                });
+        }
+    }
+
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+
+</body>

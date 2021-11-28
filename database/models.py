@@ -35,6 +35,9 @@ class Department(gj.Document):
     department = db.StringField(required=True)
 class TestType(gj.Document):
     testtype = db.StringField(required=True)
+
+class Ward(gj.Document):
+    ward = db.StringField(required=True)
 class Appointment(gj.Document):
     patientID = db.StringField(required=True)
     doctorID = db.StringField(required=True)
@@ -48,6 +51,14 @@ class MedicalTestApp(gj.Document):
     patientID = db.StringField(required=True)
     labopID = db.StringField(required=True)
     result = db.BooleanField(required=True)
+    date = db.DateTimeField(required=True)
+    timeSlot = db.StringField(required=True)
+    note = db.StringField(required=True)
+    date_created = DateTimeField(default=datetime.utcnow)
+
+class BedRequest(gj.Document):
+    patientID = db.StringField(required=True)
+    ward = db.StringField(required=True)
     date = db.DateTimeField(required=True)
     timeSlot = db.StringField(required=True)
     note = db.StringField(required=True)

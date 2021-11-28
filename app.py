@@ -406,14 +406,21 @@ def appointment():
     if request.method == 'POST':
         content = request.get_json(force=True)
         Appointment(patientID=str(current_user.id),doctorID=content['doctorID'],prescription=False,date=content['date'],timeSlot=content['timeSlot'],note=content['note']).save()
-        headers = {'Content-Type': 'text/html'}
-        return make_response("",200,headers)
+        headers = {'Content-Type': 'application/json'}
+        return make_response(jsonify({"msg": "Appointment booked"}), 200, headers)
     if request.method == 'DELETE':
         content = request.get_json(force=True)
         appointment = Appointment.objects(id=content['appID'])
         appointment.delete()
         headers = {'Content-Type': 'application/json'}
         return make_response(jsonify({"msg": "Appointment cancelled"}), 200, headers)
+
+@app.route("/bedrequest", methods=['GET', 'POST', 'DELETE'])
+@login_required
+def bedrequest():
+    if request.method == 'GET':
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('patients/bedrequests.html'),200,headers)
 
 @app.route("/bookmedicaltest", methods=['GET', 'POST', 'DELETE'])
 @login_required
@@ -428,7 +435,7 @@ def bookmedicaltest():
         content = request.get_json(force=True)
         MedicalTestApp(patientID=str(current_user.id),labopID=content['labopID'],result=False,date=content['date'],timeSlot=content['timeSlot'],note=content['note']).save()
         headers = {'Content-Type': 'text/html'}
-        return make_response("",200,headers)
+        return make_response(jsonify({"msg": "Medical Test Booked"}), 200, headers)
     if request.method == 'DELETE':
         content = request.get_json(force=True)
         appointment = MedicalTestApp.objects(id=content['appID'])
@@ -488,11 +495,19 @@ def medtestapps():
             headers = {'Content-Type': 'application/json'}
             return make_response(json.dumps(newBody),200,headers)     
 
+@app.route("/getbedrequests", methods=['GET', 'POST'])
+@login_required
+def getbedrequests():
+    if request.method == 'GET':
+        bedrequests = BedRequest.objects(patientID=str(current_user.id))
+        headers = {'Content-Type': 'application/json'}
+        return make_response(bedrequests.to_json(),200,headers)
+
 @app.route("/checkapp", methods=['GET', 'POST'])
 @login_required
 def check_app():
     if request.method == 'GET':
-        appointments = Appointment.objects(patientID=str(current_user.id))
+        appointments = Appointment.objects()
         headers = {'Content-Type': 'application/json'}
         return make_response(appointments.to_json(),200,headers)
 
@@ -500,16 +515,35 @@ def check_app():
 @login_required
 def check_medtest():
     if request.method == 'GET':
-        appointments = MedicalTestApp.objects(patientID=str(current_user.id))
+        appointments = MedicalTestApp.objects()
         headers = {'Content-Type': 'application/json'}
         return make_response(appointments.to_json(),200,headers)
 
-@app.route("/requestbed", methods=['GET', 'POST'])
+@app.route("/checkbedrequests", methods=['GET', 'POST'])
+@login_required
+def checkbedrequests():
+    if request.method == 'GET':
+        appointments = BedRequest.objects()
+        headers = {'Content-Type': 'application/json'}
+        return make_response(appointments.to_json(),200,headers)
+
+@app.route("/requestbed", methods=['GET', 'POST', 'DELETE'])
 @login_required
 def requestbed():
     if request.method == 'GET':
         headers = {'Content-Type': 'text/html'}
         return make_response(render_template('patients/requestbed.html'),200,headers)
+    if request.method == 'POST':
+        content = request.get_json(force=True)
+        BedRequest(patientID=str(current_user.id),ward=content['ward'],date=content['date'],timeSlot=content['timeSlot'],note=content['note']).save()
+        headers = {'Content-Type': 'application/json'}
+        return make_response(jsonify({"msg": "Bed Requested"}), 200, headers)
+    if request.method == 'DELETE':
+        content = request.get_json(force=True)
+        bedrequest = BedRequest.objects(id=content['id'])
+        bedrequest.delete()
+        headers = {'Content-Type': 'application/json'}
+        return make_response(jsonify({"msg": "Bed Request cancelled"}), 200, headers)
 
 @app.route("/profile", methods=['GET', 'POST'])
 @login_required
@@ -557,6 +591,20 @@ def testtypes():
         testtypes = TestType.objects()
         headers = {'Content-Type': 'application/json'}
         return make_response(testtypes.to_json(),200,headers)
+
+@app.route("/wards", methods=['GET', 'POST'])
+def wards():
+    if request.method == 'POST':
+        content = request.get_json(force=True)
+        wards = content['wards']
+        for ward in wards:
+            Ward(ward=ward).save()
+            headers = {'Content-Type': 'application/json'}
+        return make_response("",200,headers)
+    if request.method == 'GET':
+        wards = Ward.objects()
+        headers = {'Content-Type': 'application/json'}
+        return make_response(wards.to_json(),200,headers)
 
 @app.route("/doctors", methods=['GET', 'POST'])
 def doctors():
