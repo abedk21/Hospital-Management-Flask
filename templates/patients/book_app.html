@@ -151,14 +151,14 @@
       <hr>
       <div class="elem-group">
         <label for="department-selection">Select Department</label>
-        <select id="department-selection" name="room_preference" required>
-          <option value="">Choose Department</option>
+        <select id="department-selection" name="room_preference">
+          <option value="" selected disabled hidden>Choose Department</option>
         </select>
       </div>
       <div class="elem-group">
         <label for="doctor-selection">Select Doctor</label>
-        <select id="doctor-selection" name="room_preference" required>
-          <option value="">Choose Doctor</option>
+        <select id="doctor-selection" name="room_preference">
+          <option value="" selected disabled hidden>Choose Doctor</option>
         </select>
       </div>
 
@@ -166,20 +166,20 @@
 
       <div class="elem-group inlined">
         <label for="checkin-date">Select Date</label>
-        <input type="date" id="checkin-date" name="checkin" required>
+        <input type="date" id="checkin-date" name="checkin">
       </div>
 
       <div class="elem-group">
         <label for="time-selection">Select Time</label>
-        <select id="time-selection" name="time_preference" required>
-          <option value="">Choose Time Slot</option>
+        <select id="time-selection" name="time_preference">
+          <option value="" selected disabled hidden>Choose Time Slot</option>
         </select>
       </div>
 
       <div class="elem-group">
         <label for="message">Anything Else?</label>
         <textarea id="message" name="visitor_message" placeholder="Tell us anything else that might be important."
-          required></textarea>
+          ></textarea>
       </div>
       <button id="submit-btn" type="submit">Book Appointment</button>
     </form>
@@ -200,7 +200,7 @@ $(document).ready(function() {
                     //data: JSON.stringify(data),
                     success: function(result) {
                       document.getElementById("department-selection").innerHTML = "";
-            var optionList = "<option value=\"\">Choose Department</option>";
+            var optionList = "<option value=\"\" selected disabled hidden>Choose Department</option>";
             $.each(result, function(idx, obj) {
               optionList += "<option value=\"\">"+capitalizeFirstLetter(obj.department)+"</option>";
                   });
@@ -239,7 +239,7 @@ $(document).ready(function() {
     });
 
     document.getElementById('department-selection').addEventListener('change', function() {    
-      var optionList = "<option value=\"0\">Choose Doctor</option>";
+      var optionList = "<option value=\"0\" selected disabled hidden>Choose Doctor</option>";
       var e = document.getElementById('department-selection');
       var dep = e.options[e.selectedIndex].text;
             $.each(doctors, function(idx, obj) {
@@ -253,7 +253,7 @@ $(document).ready(function() {
     var booked = [];
   document.getElementById('doctor-selection').addEventListener('change', function() {
     var doctorID = document.getElementById('doctor-selection').value;
-    var optionList = "<option value=\"\">Choose Time Slot</option>";
+    var optionList = "<option value=\"\" selected disabled hidden>Choose Time Slot</option>";
     var date = document.getElementById('checkin-date').value+"T00:00:00";
     booked.splice(0, booked.length);
             $.each(appointments, function(idx, obj) {
@@ -290,7 +290,7 @@ $(document).ready(function() {
 
   document.getElementById('checkin-date').addEventListener('change', function() {
     var doctorID = document.getElementById('doctor-selection').value;
-    var optionList = "<option value=\"\">Choose Time Slot</option>";
+    var optionList = "<option value=\"\" selected disabled hidden>Choose Time Slot</option>";
     var date = document.getElementById('checkin-date').value+"T00:00:00";
     booked.splice(0, booked.length);
             $.each(appointments, function(idx, obj) {

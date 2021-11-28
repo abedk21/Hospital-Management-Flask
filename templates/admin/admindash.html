@@ -1,0 +1,184 @@
+{% include 'doctors/dashnav.html' %}
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Jekyll v3.8.6">
+    <title>MedUp - Doctor Dashboard</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.4/examples/pricing/">
+
+    <!-- Bootstrap core CSS -->
+    <link href="/docs/4.4/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" href="/docs/4.4/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
+    <link rel="icon" href="/docs/4.4/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/docs/4.4/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="manifest" href="/docs/4.4/assets/img/favicons/manifest.json">
+    <link rel="mask-icon" href="/docs/4.4/assets/img/favicons/safari-pinned-tab.svg" color="#563d7c">
+    <meta name="msapplication-config" content="/docs/4.4/assets/img/favicons/browserconfig.xml">
+    <meta name="theme-color" content="#563d7c">
+
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+
+        .hero {
+            display: inline-block;
+            position: relative;
+            width: 400px;
+            max-width: 350px;
+            height: 400px;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 5px 5px 30px rgba(0, 0, 0, 0.3);
+            margin: 30px;
+        }
+
+        .appointment-profile-img {
+            height: 70%;
+        }
+
+        .app-description-bk {
+            background-image: linear-gradient(0deg, rgb(35, 153, 174), rgba(225, 85, 85, 0.817));
+            border-radius: 30px;
+            position: absolute;
+            top: 55%;
+            left: -5px;
+            height: 65%;
+            width: 108%;
+            transform: skew(19deg, -9deg);
+        }
+
+        .second .app-description-bk {
+            background-image: linear-gradient(-20deg, #bb7413, #e7d25c)
+        }
+
+        .hero-logo {
+            height: 80px;
+            width: 80px;
+            border-radius: 20px;
+            background-color: #fff;
+            position: absolute;
+            bottom: 30%;
+            left: 30px;
+            overflow: hidden;
+            box-shadow: 5px 5px 30px rgba(0, 0, 0, 0.7);
+        }
+
+        .hero-logo img {
+            height: 100%;
+        }
+
+        .app-description {
+            position: absolute;
+            color: #fff;
+            font-weight: 900;
+            left: 74px;
+            bottom: 26%;
+        }
+
+        .app-btn {
+            position: absolute;
+            color: #fff;
+            right: 30px;
+            bottom: 10%;
+            padding: 10px 20px;
+            border: 1px solid #fff;
+        }
+
+        .-btn a {
+            color: #fff;
+        }
+
+        .hero-date {
+            position: absolute;
+            color: #fff;
+            left: 30px;
+            bottom: 10%;
+        }
+
+        /* END CARD DESIGN */
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            background-color: #eee;
+            min-height: 100vh;
+        }
+
+        .btn i:before {
+            width: 14px;
+            height: 14px;
+            position: fixed;
+            color: #fff;
+            background: #0077B5;
+            padding: 10px;
+            border-radius: 50%;
+            top: 5px;
+            right: 5px;
+        }
+    </style>
+    <!-- Custom styles for this template -->
+    <link href="main.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="btn">
+        <a href="https://www.linkedin.com/in/florin-cornea-b5118057/" target="_blank">
+            <i class="fab fa-linkedin"></i>
+        </a>
+    </div>
+
+    <div class="first hero">
+        <img class="appointment-profile-img"
+            src="" alt="">
+        <div class="app-description-bk"></div>
+        
+        <div class="app-description">
+            <p>Add Staff Members</p>
+        </div>
+        
+        <div class="app-btn">
+            <a href="{{ url_for('addstaff') }}">Add Staff</a>
+        </div>
+    </div>
+
+    <div class="second hero">
+        <img class="appointment-profile-img" src=""
+            alt="">
+        <div class="app-description-bk"></div>
+        
+        <div class="app-description">
+            <p>View Staff Members</p>
+        </div>
+        
+        <div class="app-btn">
+            <a href="{{ url_for('viewstaff') }}">View Staff</a>
+        </div>
+    </div>
+
+
+
+</body>
+
+</html>

@@ -586,6 +586,21 @@
             }
         }
 
+        div.elem-group {
+      margin: 20px 0;
+    }
+
+    div.elem-group.inlined {
+      width: 100%;
+      display: inline-block;
+      margin-left: 1%;
+    }
+
+    div.elem-group.inlined input {
+      width: 95%;
+      display: inline-block;
+    }
+
         .btn {
             font-size: 1rem;
             font-weight: 600;
@@ -2070,6 +2085,11 @@
             margin-left: 950px;
             margin-top: 25px;
         }
+
+        .disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            }
     </style>
 </head>
 
@@ -2083,7 +2103,7 @@
             <div class="card-header bg-white border-0">
                 <div class="row align-items-center">
                     <div class="col-8">
-                        <h3 class="mb-0">My account</h3>
+                        <h3 class="mb-0">Add New Staff Member</h3>
                     </div>
 
                 </div>
@@ -2096,7 +2116,13 @@
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label class="form-control-label" for="input-email">Email address</label>
-                                    <input type="email" id="input-email" class="form-control form-control-alternative" readonly="readonly">
+                                    <input type="email" id="input-email" class="form-control form-control-alternative">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="input-password">Password</label>
+                                    <input type="password" id="input-password" class="form-control form-control-alternative">
                                 </div>
                             </div>
                         </div>
@@ -2118,10 +2144,50 @@
 
                             <div class="col-lg-6">
                                 <div class="form-group focused">
-                                    <label class="form-control-label" for="input-last-name">Mobile Number</label>
+                                    <label class="form-control-label" for="input-mobile-number">Mobile Number</label>
                                     <input type="number" id="input-mobile-number"
                                         class="form-control form-control-alternative">
                                 </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group focused">
+                                    <label class="form-control-label" for="input-age">Age</label>
+                                    <input type="number" id="input-age"
+                                        class="form-control form-control-alternative">
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group focused">
+                                        <label class="form-control-label" for="gender-selection">Gender</label>
+                                        <select class="form-control form-control-alternative" id="gender-selection">
+                                          <option value="" selected disabled hidden>Choose Gender</option>
+                                          <option value="">Male</option>
+                                          <option value="">Female</option>
+                                        </select>
+                                    </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group focused">
+                                        <label class="form-control-label" for="role-selection">Role</label>
+                                        <select class="form-control form-control-alternative" id="role-selection">
+                                          <option value="" selected disabled hidden>Choose Role</option>
+                                          <option value="">Doctor</option>
+                                          <option value="">Lab Operator</option>
+                                        </select>
+                                    </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group focused">
+                                        <label class="form-control-label" for="department-selection">Department</label>
+                                        <select class="form-control form-control-alternative" id="department-selection">
+                                          <option value="" selected disabled hidden>Choose Department</option>
+                                        </select>
+                                    </div>
                             </div>
                         </div>
                     </div>
@@ -2142,13 +2208,15 @@
                             <div class="col-lg-4">
                                 <div class="form-group focused">
                                     <label class="form-control-label" for="input-city">City</label>
-                                    <input type="text" id="input-city" class="form-control form-control-alternative">
+                                    <input type="text" id="input-city" class="form-control form-control-alternative"
+                                        >
                                 </div>
                             </div>
                             <div class="col-lg-4">
                                 <div class="form-group focused">
                                     <label class="form-control-label" for="input-country">Country</label>
-                                    <input type="text" id="input-country" class="form-control form-control-alternative">
+                                    <input type="text" id="input-country" class="form-control form-control-alternative"
+                                        >
                                 </div>
                             </div>
                             <div class="col-lg-4">
@@ -2158,7 +2226,7 @@
                                         class="form-control form-control-alternative">
                                 </div>
                             </div>
-                            <button id='save-btn' class=save>Save</button>
+                            <button id='save-btn' class="save">Add</button>
                         </div>
                     </div>
                 </form>
@@ -2168,56 +2236,84 @@
     </div>
     <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
     <script type="text/JavaScript">
-        // function setupData() {
-        //     $(document).ready(function () {
-        //         try {
-        //             const response = await fetch("{{ url_for('user') }}", {
-        //                 method: 'GET',
-        //                 //   headers: {'Content-Type': 'application/json'},
-        //                 //   body: JSON.stringify(data),
-        //             });
-        //             console.log('Completed!', response);
-        //             document.getElementById("input-email").value = response.json['email'];
-        //         } catch (err) {
-        //             console.error(`Error: ${err}`);
-        //         }
-        //     });
-        // }
+        var departments;
+        var testtypes;
         $(document).ready(function() {
         $.ajax({
             type: "GET",
             dataType: "JSON",
             //async: false,
-            url: "{{ url_for('user') }}",
+            url: "{{ url_for('departments') }}",
           success: function (data) {
-            document.getElementById("input-email").value = data.email;
-            document.getElementById("input-first-name").value = data.firstName;
-            document.getElementById("input-last-name").value = data.lastName;
-            document.getElementById("input-mobile-number").value = data.phoneNumber;
+              departments = data;
+          }});
+
+          $.ajax({
+            type: "GET",
+            dataType: "JSON",
+            //async: false,
+            url: "{{ url_for('testtypes') }}",
+          success: function (data) {
+              testtypes = data;
           }
+        });
+
+
+        document.getElementById('role-selection').addEventListener('change', function() { 
+    document.getElementById("department-selection").innerHTML = "";
+            var optionList = "<option value=\"\" selected disabled hidden>Choose Department</option>";
+            var e = document.getElementById('role-selection');
+            var role = e.options[e.selectedIndex].text;
+            var objects = [];
+            if (role == "Doctor"){
+                objects = departments;
+            } else if (role == "Lab Operator") {
+                objects = testtypes;
+            }
+            $.each(objects, function(idx, obj) {
+                if (role == "Doctor"){
+              optionList += "<option>"+obj.department+"</option>";
+                } else if (role == "Lab Operator") {
+                    optionList += "<option>"+obj.testtype+"</option>";
+                }
+                  });
+            document.getElementById("department-selection").innerHTML = optionList;
+                });
+
         });
 
         const savebutton = document.getElementById('save-btn');
         $(savebutton).on("click", function(e) {
             e.preventDefault();
             var email = document.getElementById("input-email").value;
+            var password = document.getElementById("input-password").value;
             var firstName = document.getElementById("input-first-name").value;
             var lastName = document.getElementById("input-last-name").value;
             var phoneNumber = document.getElementById("input-mobile-number").value;
-            let data = {firstName: firstName, lastName: lastName, phoneNumber: phoneNumber}
+            var age = document.getElementById("input-age").value;
+            var e = document.getElementById('gender-selection');
+            var gender = e.options[e.selectedIndex].text;
+            var r = document.getElementById('role-selection');
+            var role = r.options[r.selectedIndex].text;
+            if(role == "Lab Operator"){
+                role = "Labop";
+            }
+            var d = document.getElementById('department-selection');
+            var department = d.options[d.selectedIndex].text;
+            let data = {email: email, password: password, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber, age: age, gender: gender, department: department, role: role}
             $.ajax({
-                    type: "PATCH",
-                    url: "{{ url_for('update') }}",
+                    type: "POST",
+                    url: "{{ url_for('register') }}",
                     data: JSON.stringify(data),
                     success: function(result) {
-                        alert('Info updated successfully');
+                        alert('Staff Member Added');
                     },
                     error: function(result) {
                         alert('error');
                     }
                 });
         });
-        });
+
         function goBack() {
             window.location.href = "{{ url_for('home') }}";
             // window.history.back();

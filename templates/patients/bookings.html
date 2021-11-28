@@ -3,7 +3,7 @@
         .styled-table {
             border-collapse: collapse;
             margin-top: 125px;
-            font-size: 0.9em;
+            font-size: 0.8em;
             font-family: sans-serif;
             min-width: 90%;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
@@ -90,17 +90,15 @@
 <body>
 
     <div class="header">
-        <h1>View Appointments</h1>
+        <h1>Appointments</h1>
     </div>
     <button class="btn back" onclick="goBack()">Go Back</button>
     <table id="app-table" class="styled-table">
 
         <thead>
             <tr>
-                <th>Doctor Name</th>
-                <th>Department</th>
-                <th>Date</th>
-                <th>Time</th>
+                <th>Date & Time</th>
+                <th>Doctor</th>
                 <th>Prescription</th>
                 <th></th>
             </tr>
@@ -125,18 +123,19 @@ $(document).ready(function() {
             var rows = "";
             //JSON.stringify(result)
             $.each(result, function(idx, obj) {
-              column1 = "<tr>\n<td>Dr. "+capitalizeFirstLetter(obj.doctor.firstName)+" "+capitalizeFirstLetter(obj.doctor.lastName)+"</td>\n";
-              column2 = "<td>"+capitalizeFirstLetter(obj.doctor.department)+"</td>\n"
-              column3 = "<td>"+timeConverter(obj.appointment.date)+"</td>\n";
-              column4 = "<td>"+obj.appointment.timeSlot+"</td>\n";
+                column1 = "<tr>\n<td><p style=\"width:120%;\">"+timeConverter(obj.appointment.date)+" ("+obj.appointment.timeSlot+")</p></td>\n";
+              column2 = "<td><p style=\"width:120%;\"><b>Name:</b> Dr. "+capitalizeFirstLetter(obj.doctor.firstName)+" "+capitalizeFirstLetter(obj.doctor.lastName)+"</p>";
+                column3 = "<p style=\"width:120%;\"><b>Email:</b> "+obj.doctor.email+"</p>";
+                column4 = "<p style=\"width:120%;\"><b>Phone:</b> "+obj.doctor.phoneNumber+"</p>";
+              column5 = "<p style=\"width:120%;\"><b>Department:</b> "+capitalizeFirstLetter(obj.doctor.department)+"</p></td>\n"
               var status = "Available";
-              column6 = ""
+              column7 = ""
               if(!obj.appointment.prescription){
                   status = "Not Available";
-                  column6 = "<td><button type=\"button\" class=\"delete-btn\" onclick=deleteApp(\""+obj.appointment.id+"\")>Cancel</button></td>\n</tr>\n";
+                  column7 = "<td><button type=\"button\" class=\"delete-btn\" onclick=deleteApp(\""+obj.appointment.id+"\")>Cancel</button></td>\n</tr>\n";
               }
-              column5 = "<td>"+status+"</td>\n";
-              row = column1+column2+column3+column4+column5+column6;
+              column6 = "<td>"+status+"</td>\n";
+              row = column1+column2+column3+column4+column5+column6+column7;
               rows += row;
                   });
                   $("#app-table  tbody").append(rows);

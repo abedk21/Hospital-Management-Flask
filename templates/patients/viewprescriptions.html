@@ -90,17 +90,15 @@
 <body>
 
     <div class="header">
-        <h1>View Prescriptions</h1>
+        <h1>Prescriptions</h1>
     </div>
     <button class="btn back" onclick="goBack()">Go Back</button>
     <table id="app-table" class="styled-table">
 
         <thead>
             <tr>
-                <th>Doctor Name</th>
-                <th>Department</th>
-                <th>Appointment Date</th>
-                <th>Appointment Time</th>
+                <th>Appointment Date & Time</th>
+                <th>Doctor</th>
                 <th></th>
             </tr>
         </thead>
@@ -125,12 +123,13 @@ $(document).ready(function() {
             //JSON.stringify(result)
             $.each(result, function(idx, obj) {
                 if(obj.appointment.prescription){
-              column1 = "<tr>\n<td>Dr. "+capitalizeFirstLetter(obj.doctor.firstName)+" "+capitalizeFirstLetter(obj.doctor.lastName)+"</td>\n";
-              column2 = "<td>"+capitalizeFirstLetter(obj.doctor.department)+"</td>\n"
-              column3 = "<td>"+timeConverter(obj.appointment.date)+"</td>\n";
-              column4 = "<td>"+obj.appointment.timeSlot+"</td>\n";
-            column5 = "<td><button type=\"button\" class=\"download-btn\" onclick=downloadPrescription(\""+obj.doctor.id+"\",\""+obj.appointment.id+"\",\""+obj.appointment.date+"\")>Download</button></td>\n</tr>\n";
-              row = column1+column2+column3+column4+column5;
+                    column1 = "<tr>\n<td><p style=\"width:120%;\">"+timeConverter(obj.appointment.date)+" ("+obj.appointment.timeSlot+")</p></td>\n";
+              column2 = "<td><p style=\"width:120%;\"><b>Name:</b> Dr. "+capitalizeFirstLetter(obj.doctor.firstName)+" "+capitalizeFirstLetter(obj.doctor.lastName)+"</p>";
+                column3 = "<p style=\"width:120%;\"><b>Email:</b> "+obj.doctor.email+"</p>";
+                column4 = "<p style=\"width:120%;\"><b>Phone:</b> "+obj.doctor.phoneNumber+"</p>";
+              column5 = "<p style=\"width:120%;\"><b>Department:</b> "+capitalizeFirstLetter(obj.doctor.department)+"</p></td>\n"
+            column6 = "<td><button type=\"button\" class=\"download-btn\" onclick=downloadPrescription(\""+obj.doctor.id+"\",\""+obj.appointment.id+"\",\""+obj.appointment.date+"\")>Download</button></td>\n</tr>\n";
+              row = column1+column2+column3+column4+column5+column6;
               rows += row;
                 }
                   });

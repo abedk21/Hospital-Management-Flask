@@ -153,13 +153,13 @@
           <div class="elem-group">
             <label for="test-selection">Select Test Type</label>
             <select id="test-selection" name="room_preference" required>
-              <option value="">Choose Test Type</option>
+              <option value="" selected disabled hidden>Choose Test Type</option>
             </select>
           </div>    
           <div class="elem-group">
             <label for="labop-selection">Select Lab Operator</label>
             <select id="labop-selection" name="room_preference" required>
-              <option value="">Choose Lab Operator</option>
+              <option value="" selected disabled hidden>Choose Lab Operator</option>
             </select>
           </div>
     
@@ -173,7 +173,7 @@
           <div class="elem-group">
             <label for="time-selection">Select Time</label>
             <select id="time-selection" name="time_preference" required>
-              <option value="">Choose Time Slot</option>
+              <option value="" selected disabled hidden>Choose Time Slot</option>
             </select>
           </div>
     
@@ -201,7 +201,7 @@
                         //data: JSON.stringify(data),
                         success: function(result) {
                           document.getElementById("test-selection").innerHTML = "";
-                var optionList = "<option value=\"\">Choose Test Type</option>";
+                var optionList = "<option value=\"\" selected disabled hidden>Choose Test Type</option>";
                 $.each(result, function(idx, obj) {
                   optionList += "<option value=\"\">"+capitalizeFirstLetter(obj.testtype)+"</option>";
                       });
@@ -240,7 +240,7 @@
         });
     
         document.getElementById('test-selection').addEventListener('change', function() {    
-          var optionList = "<option value=\"0\">Choose Lab Operator</option>";
+          var optionList = "<option value=\"0\" selected disabled hidden>Choose Lab Operator</option>";
           var e = document.getElementById('test-selection');
           var dep = e.options[e.selectedIndex].text;
                 $.each(labops, function(idx, obj) {
@@ -254,7 +254,7 @@
         var booked = [];
       document.getElementById('labop-selection').addEventListener('change', function() {
         var labopID = document.getElementById('labop-selection').value;
-        var optionList = "<option value=\"\">Choose Time Slot</option>";
+        var optionList = "<option value=\"\" selected disabled hidden>Choose Time Slot</option>";
         var date = document.getElementById('checkin-date').value+"T00:00:00";
         booked.splice(0, booked.length);
                 $.each(appointments, function(idx, obj) {
@@ -295,7 +295,7 @@
     
       document.getElementById('checkin-date').addEventListener('change', function() {
         var labopID = document.getElementById('labop-selection').value;
-        var optionList = "<option value=\"\">Choose Time Slot</option>";
+        var optionList = "<option value=\"\" selected disabled hidden>Choose Time Slot</option>";
         var date = document.getElementById('checkin-date').value+"T00:00:00";
         booked.splice(0, booked.length);
                 $.each(appointments, function(idx, obj) {

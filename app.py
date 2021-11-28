@@ -1,5 +1,6 @@
 from database.db import *
 from database.models import *
+from mongoengine.queryset.visitor import Q
 from flask import Flask, request, render_template, url_for, send_file, flash, redirect, url_for, jsonify
 from flask_restful import Api
 from flask import make_response
@@ -150,15 +151,62 @@ def logout():
 @login_required
 def home():
     if current_user.is_authenticated:
-        email = current_user.email
-        role = User.objects(email=email).first().role.lower()
+        role = current_user.role.lower()
         headers = {'Content-Type': 'text/html'}
         if role == "doctor":
             return make_response(render_template('doctors/docdash.html'),200,headers)
         elif role == "patient":           
             return make_response(render_template('patients/patdash.html'),200,headers)
-        else:
+        elif role == "labop":
             return make_response(render_template('tech/techdash.html'),200,headers)
+        elif role == "admin":
+            return make_response(render_template('admin/admindash.html'),200,headers)
+
+@app.route("/addstaff")
+@login_required
+def addstaff():
+    role = current_user.role.lower()
+    headers = {'Content-Type': 'text/html'}
+    if role == "admin":
+        return make_response(render_template('admin/addstaff.html'),200,headers)
+
+@app.route("/viewstaff")
+@login_required
+def viewstaff():
+    role = current_user.role.lower()
+    headers = {'Content-Type': 'text/html'}
+    if role == "admin":
+        return make_response(render_template('admin/viewstaff.html'),200,headers)
+
+@app.route("/getstaff", methods=['GET'])
+@login_required
+def getstaff():
+    role = current_user.role.lower()
+    headers = {'Content-Type': 'application/json'}
+    if role == "admin":
+        staff = User.objects.filter(Q(role="Doctor") | Q(role="Labop"))
+        headers = {'Content-Type': 'application/json'}
+        return make_response(staff.to_json(),200,headers)
+
+@app.route("/deletestaff", methods=['DELETE'])
+@login_required
+def deletestaff():
+    role = current_user.role.lower()
+    headers = {'Content-Type': 'application/json'}
+    if role == "admin":
+        content = request.get_json(force=True)
+        id = content['id']
+        staff = User.objects(id=id).first().delete()
+        return "",200
+
+@app.route("/editstaff", methods=['GET', 'POST'])
+@login_required
+def editstaff():
+    role = current_user.role.lower()
+    if role == "admin":
+        if request.method == 'GET':
+            headers = {'Content-Type': 'text/html'}
+            return make_response(render_template('admin/editstaff.html'),200,headers)
 
 @app.route("/viewprescriptions", methods=['GET', 'POST'])
 @login_required
@@ -475,7 +523,11 @@ def profile():
 def user():
     if request.method == 'GET':
         headers = {'Content-Type': 'application/json'}
-        return make_response(current_user.to_json(),200,headers)
+        id = request.args.get('id')
+        if id is None:          
+            return make_response(current_user.to_json(),200,headers)
+        user = User.objects(id=id).first()
+        return make_response(user.to_json(),200,headers)
 
 
 @app.route("/departments", methods=['GET', 'POST'])
@@ -523,15 +575,29 @@ def labops():
 @app.route("/update", methods=['PATCH'])
 @login_required
 def update():
+    id = request.args.get('id')
+    if id is None:
+        id = current_user.id
     content = request.get_json(force=True)
-    User.objects(id = current_user.id).update(
-        email = content['email'],
-        firstName = content['firstName'],
-        lastName = content['lastName'],
-        phoneNumber = content['phoneNumber']
-    )
+    if current_user.role != "Admin":
+        User.objects(id = id).update(
+            firstName = content['firstName'],
+            lastName = content['lastName'],
+            phoneNumber = content['phoneNumber']
+        )
+    else:
+        User.objects(id = id).update(
+            firstName = content['firstName'],
+            lastName = content['lastName'],
+            phoneNumber = content['phoneNumber'],
+            age = content['age'],
+            gender = content['gender'],
+            role = content['role'],
+            department = content['department']
+        )
+    user = User.objects(id=id).first()
     headers = {'Content-Type': 'application/json'}
-    return make_response(current_user.to_json(),200,headers)
+    return make_response(user.to_json(),200,headers)
 
 if __name__ == "__main__":
     app.run(debug=True)

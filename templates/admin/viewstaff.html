@@ -80,6 +80,15 @@
             padding-top: 5px;
         }
 
+        .delete-btn {
+            background: red;
+            font-size: medium;
+            margin-bottom: 0px;
+            margin-top: 0px;
+            max-height: 45px;
+            padding-top: 5px;
+        }
+
         .styled-table th,
         .styled-table td {
             padding: 12px 45px;
@@ -90,15 +99,17 @@
 <body>
 
     <div class="header">
-        <h1>Medical Test Results</h1>
+        <h1>Staff</h1>
     </div>
     <button class="btn back" onclick="goBack()">Go Back</button>
+
     <table id="app-table" class="styled-table">
 
         <thead>
             <tr>
-                <th>Appointment Date & Time</th>
-                <th>Lab Operator</th>
+                <th>Date Added</th>
+                <th>Staff</th>
+                <th></th>
                 <th></th>
             </tr>
         </thead>
@@ -109,29 +120,28 @@
 
     <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
     <script type="text/JavaScript">
-
 $(document).ready(function() {
         
         $.ajax({
                     type: "GET",
                     dataType: "JSON",
-                    url: "{{ url_for('medtestapps') }}",
+                    url: "{{ url_for('getstaff') }}",
                     //data: JSON.stringify(data),
                     success: function(result) {
                         
             var rows = "";
             //JSON.stringify(result)
             $.each(result, function(idx, obj) {
-                if(obj.appointment.result){
-                    column1 = "<tr>\n<td><p style=\"width:120%;\">"+timeConverter(obj.appointment.date)+" ("+obj.appointment.timeSlot+")</p></td>\n";
-              column2 = "<td><p style=\"width:120%;\"><b>Name:</b> "+capitalizeFirstLetter(obj.labop.firstName)+" "+capitalizeFirstLetter(obj.labop.lastName)+"</p>";
-                column3 = "<p style=\"width:120%;\"><b>Email:</b> "+obj.labop.email+"</p>";
-                column4 = "<p style=\"width:120%;\"><b>Phone:</b> "+obj.labop.phoneNumber+"</p>";
-              column5 = "<p style=\"width:120%;\"><b>Department:</b> "+capitalizeFirstLetter(obj.doctor.department)+"</p></td>\n"
-            column6 = "<td><button type=\"button\" class=\"download-btn\" onclick=downloadTestResult(\""+obj.labop.id+"\",\""+obj.appointment.id+"\",\""+obj.appointment.date+"\")>Download</button></td>\n</tr>\n";
-              row = column1+column2+column3+column4+column5+column6;
+                    column1 = "<tr>\n<td><p style=\"width:120%;\">"+timeConverter(obj.date_created)+"</p></td>\n";
+              column2 = "<td><p style=\"width:120%;\"><b>Name:</b> "+capitalizeFirstLetter(obj.firstName)+" "+capitalizeFirstLetter(obj.lastName)+"</p>";
+                column3 = "<p style=\"width:120%;\"><b>Email:</b> "+obj.email+"</p>";
+                column4 = "<p style=\"width:120%;\"><b>Phone:</b> "+obj.phoneNumber+"</p>";
+                column5 = "<p style=\"width:120%;\"><b>Role:</b> "+obj.role+"</p>";
+                column6 = "<p style=\"width:120%;\"><b>Department:</b> "+obj.department+"</p></td>\n";
+              column7 = "<td><button type=\"button\" class=\"download-btn\" onclick=editStaff(\""+obj.id+"\")>Edit</button></td>\n";
+            column8 = "<td><button type=\"button\" class=\"delete-btn\" onclick=deleteStaff(\""+obj.id+"\")>Delete</button></td>\n</tr>\n";
+              row = column1+column2+column3+column4+column5+column6+column7+column8;
               rows += row;
-                }
                   });
                   $("#app-table  tbody").append(rows);
                     },
@@ -150,20 +160,7 @@ $(document).ready(function() {
                     var hour = a.getHours();
                     var min = a.getMinutes();
                     var sec = a.getSeconds();
-                    var time = date + ' ' + month + ' ' + year;
-                    return time;
-                }
-
-    function timeConverter2(UNIX_timestamp){
-                    var a = new Date(UNIX_timestamp);
-                    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-                    var year = a.getFullYear();
-                    var month = ("0" + (a.getMonth() + 1)).slice(-2);
-                    var date = ("0" + a.getDate()).slice(-2);
-                    var hour = a.getHours();
-                    var min = a.getMinutes();
-                    var sec = a.getSeconds();
-                    var time = date + '' + month + '' + year;
+                    var time = date + ' ' + month + ' ' + year + ' ' + hour + ":" + min + ":" + sec;
                     return time;
                 }
 
@@ -171,26 +168,30 @@ $(document).ready(function() {
                     return string.charAt(0).toUpperCase() + string.slice(1);
                 }
 
-    function downloadTestResult(labopID, appID, date){
-            var url = "{{ url_for('downloadMedicalTest') }}"+"?labopID="+labopID+"&appID="+appID;
-            downloadFile(url, date);  
+    function editStaff(staffID){
+        localStorage["staffID"] = staffID;
+        location.href = "{{ url_for('editstaff') }}";
+
     }
 
-    function downloadFile(urlToSend, date) {
-     var req = new XMLHttpRequest();
-     req.open("GET", urlToSend, true);
-     req.responseType = "blob";
-     req.onload = function (event) {
-         var blob = req.response;
-         var fileName = "test_result_"+timeConverter2(date);
-         var link=document.createElement('a');
-         link.href=window.URL.createObjectURL(blob);
-         link.download=fileName;
-         link.click();
-     };
-
-     req.send();
- }
+ function deleteStaff(id){
+        var c = confirm("Are you sure you want to delete staff member?");
+        if (c) {
+            let data = {id: id}
+            $.ajax({
+                    type: "DELETE",
+                    url: "{{ url_for('deletestaff') }}",
+                    data: JSON.stringify(data),
+                    success: function(result) {
+                        window.alert("Staff Member Deleted");
+                        location.reload();
+                },
+                    error: function(result) {
+                        alert('error');
+                    }
+                });
+        }
+    }
 
         function goBack() {
             window.history.back();

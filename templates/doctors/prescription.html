@@ -152,14 +152,14 @@
           <div class="elem-group">
             <label for="patient-selection">Patient</label>
             <select id="patient-selection" name="select_patient" required>
-              <option value="">Choose Patient</option>
+              <option value="" selected disabled hidden>Choose Patient</option>
             </select>
           </div> 
 
           <div class="elem-group">
             <label for="app-selection">Appointment</label>
             <select id="app-selection" name="select_app" required>
-              <option value="">Choose Appointment</option>
+              <option value="" selected disabled hidden>Choose Appointment</option>
             </select>
           </div> 
             <label for="file">Choose file to upload</label>
@@ -184,7 +184,7 @@ $(document).ready(function() {
                         appointments = result;
                       document.getElementById("patient-selection").innerHTML = "";
                       var patientIDs = [];
-            var optionList = "<option value=\"\">Choose Patient</option>";
+            var optionList = "<option value=\"\" selected disabled hidden>Choose Patient</option>";
             $.each(result, function(idx, obj) {
                 if(!obj.appointment.prescription){
                 if(!patientIDs.includes(obj.patient.id)){
@@ -204,7 +204,7 @@ $(document).ready(function() {
 
     document.getElementById('patient-selection').addEventListener('change', function() { 
     document.getElementById("app-selection").innerHTML = "";
-            var optionList = "<option value=\"\">Choose Appointment</option>";
+            var optionList = "<option value=\"\" selected disabled hidden>Choose Appointment</option>";
             var patientID = document.getElementById('patient-selection').value;
             $.each(appointments, function(idx, obj) {
                 if(obj.appointment.patientID == patientID && !obj.appointment.prescription) {

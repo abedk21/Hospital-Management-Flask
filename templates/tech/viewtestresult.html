@@ -99,7 +99,7 @@
 <body>
 
     <div class="header">
-        <h1>View Medical Test Results</h1>
+        <h1>Medical Test Results</h1>
     </div>
     <button class="btn back" onclick="goBack()">Go Back</button>
 
@@ -107,9 +107,8 @@
 
         <thead>
             <tr>
-                <th>Patient Name</th>
-                <th>Appointment Date</th>
-                <th>Appointment Time</th>
+                <th>Appointment Date & Time</th>
+                <th>Patient</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -135,12 +134,13 @@ $(document).ready(function() {
             //JSON.stringify(result)
             $.each(result, function(idx, obj) {
                 if(obj.appointment.result){
-              column1 = "<tr>\n<td>Dr. "+capitalizeFirstLetter(obj.patient.firstName)+" "+capitalizeFirstLetter(obj.patient.lastName)+"</td>\n";
-              column2 = "<td>"+timeConverter(obj.appointment.date)+"</td>\n";
-              column3 = "<td>"+obj.appointment.timeSlot+"</td>\n";
-              column4 = "<td><button type=\"button\" class=\"download-btn\" onclick=downloadMedTest(\""+obj.patient.id+"\",\""+obj.appointment.id+"\",\""+obj.appointment.date+"\")>Download</button></td>\n";
-            column5 = "<td><button type=\"button\" class=\"delete-btn\" onclick=deleteMedTest(\""+obj.patient.id+"\",\""+obj.appointment.id+"\")>Delete</button></td>\n</tr>\n";
-              row = column1+column2+column3+column4+column5;
+                    column1 = "<tr>\n<td><p style=\"width:120%;\">"+timeConverter(obj.appointment.date)+" ("+obj.appointment.timeSlot+")</p></td>\n";
+              column2 = "<td><p style=\"width:120%;\"><b>Name:</b> "+capitalizeFirstLetter(obj.patient.firstName)+" "+capitalizeFirstLetter(obj.patient.lastName)+"</p>";
+                column3 = "<p style=\"width:120%;\"><b>Email:</b> "+obj.patient.email+"</p>";
+                column4 = "<p style=\"width:120%;\"><b>Phone:</b> "+obj.patient.phoneNumber+"</p></td>\n";
+              column5 = "<td><button type=\"button\" class=\"download-btn\" onclick=downloadMedTest(\""+obj.patient.id+"\",\""+obj.appointment.id+"\",\""+obj.appointment.date+"\")>Download</button></td>\n";
+            column6 = "<td><button type=\"button\" class=\"delete-btn\" onclick=deleteMedTest(\""+obj.patient.id+"\",\""+obj.appointment.id+"\")>Delete</button></td>\n</tr>\n";
+              row = column1+column2+column3+column4+column5+column6;
               rows += row;
                 }
                   });

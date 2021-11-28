@@ -2118,10 +2118,50 @@
 
                             <div class="col-lg-6">
                                 <div class="form-group focused">
-                                    <label class="form-control-label" for="input-last-name">Mobile Number</label>
+                                    <label class="form-control-label" for="input-mobile-name">Mobile Number</label>
                                     <input type="number" id="input-mobile-number"
                                         class="form-control form-control-alternative">
                                 </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group focused">
+                                    <label class="form-control-label" for="input-age">Age</label>
+                                    <input type="number" id="input-age"
+                                        class="form-control form-control-alternative">
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group focused">
+                                        <label class="form-control-label" for="gender-selection">Gender</label>
+                                        <select class="form-control form-control-alternative" id="gender-selection">
+                                          <option value="" selected disabled hidden>Choose Gender</option>
+                                          <option value="">Male</option>
+                                          <option value="">Female</option>
+                                        </select>
+                                    </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group focused">
+                                        <label class="form-control-label" for="role-selection">Role</label>
+                                        <select class="form-control form-control-alternative" id="role-selection">
+                                          <option value="" selected disabled hidden>Choose Role</option>
+                                          <option value="">Doctor</option>
+                                          <option value="">Lab Operator</option>
+                                        </select>
+                                    </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group focused">
+                                        <label class="form-control-label" for="department-selection">Department</label>
+                                        <select class="form-control form-control-alternative" id="department-selection">
+                                          <option value="" selected disabled hidden>Choose Department</option>
+                                        </select>
+                                    </div>
                             </div>
                         </div>
                     </div>
@@ -2168,32 +2208,102 @@
     </div>
     <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
     <script type="text/JavaScript">
-        // function setupData() {
-        //     $(document).ready(function () {
-        //         try {
-        //             const response = await fetch("{{ url_for('user') }}", {
-        //                 method: 'GET',
-        //                 //   headers: {'Content-Type': 'application/json'},
-        //                 //   body: JSON.stringify(data),
-        //             });
-        //             console.log('Completed!', response);
-        //             document.getElementById("input-email").value = response.json['email'];
-        //         } catch (err) {
-        //             console.error(`Error: ${err}`);
-        //         }
-        //     });
-        // }
+var departments;
+var testtypes;
         $(document).ready(function() {
+            $.ajax({
+            type: "GET",
+            dataType: "JSON",
+            //async: false,
+            url: "{{ url_for('departments') }}",
+          success: function (data) {
+              departments = data;
+          }});
+
+          $.ajax({
+            type: "GET",
+            dataType: "JSON",
+            //async: false,
+            url: "{{ url_for('testtypes') }}",
+          success: function (data) {
+              testtypes = data;
+          }
+        });
         $.ajax({
             type: "GET",
             dataType: "JSON",
             //async: false,
-            url: "{{ url_for('user') }}",
+            url: "{{ url_for('user') }}?id="+localStorage["staffID"],
           success: function (data) {
             document.getElementById("input-email").value = data.email;
             document.getElementById("input-first-name").value = data.firstName;
             document.getElementById("input-last-name").value = data.lastName;
             document.getElementById("input-mobile-number").value = data.phoneNumber;
+            document.getElementById("input-age").value = data.age;
+            var textToFind = data.gender;
+            var dd = document.getElementById('gender-selection');
+            for (var i = 0; i < dd.options.length; i++) {
+                if (dd.options[i].text === textToFind) {
+                    dd.selectedIndex = i;
+                    break;
+                }
+            }
+            var textToFind = "Doctor";
+            if (data.role == "Labop") {
+                textToFind = "Lab Operator";
+            }
+            var dd = document.getElementById('role-selection');
+            for (var i = 0; i < dd.options.length; i++) {
+                if (dd.options[i].text === textToFind) {
+                    dd.selectedIndex = i;
+                    break;
+                }
+            }
+            var optionList;
+            var objects = [];
+            if (data.role == "Doctor"){
+                objects = departments;
+            } else if (data.role == "Labop") {
+                objects = testtypes;
+            }
+            $.each(objects, function(idx, obj) {
+                if (data.role == "Doctor"){
+              optionList += "<option>"+obj.department+"</option>";
+                } else if (data.role == "Labop") {
+                    optionList += "<option>"+obj.testtype+"</option>";
+                }
+                  });
+            document.getElementById("department-selection").innerHTML = optionList;
+
+            textToFind = data.department;
+            dd = document.getElementById('department-selection');
+            for (var i = 0; i < dd.options.length; i++) {
+                if (dd.options[i].text === textToFind) {
+                    dd.selectedIndex = i;
+                    break;
+                }
+            }
+
+            document.getElementById('role-selection').addEventListener('change', function() { 
+    document.getElementById("department-selection").innerHTML = "";
+            var optionList = "<option value=\"\" selected disabled hidden>Choose Department</option>";
+            var e = document.getElementById('role-selection');
+            var role = e.options[e.selectedIndex].text;
+            var objects = [];
+            if (role == "Doctor"){
+                objects = departments;
+            } else if (role == "Lab Operator") {
+                objects = testtypes;
+            }
+            $.each(objects, function(idx, obj) {
+                if (role == "Doctor"){
+              optionList += "<option>"+obj.department+"</option>";
+                } else if (role == "Lab Operator") {
+                    optionList += "<option>"+obj.testtype+"</option>";
+                }
+                  });
+            document.getElementById("department-selection").innerHTML = optionList;
+                });
           }
         });
 
@@ -2201,13 +2311,24 @@
         $(savebutton).on("click", function(e) {
             e.preventDefault();
             var email = document.getElementById("input-email").value;
+            var password = document.getElementById("input-password").value;
             var firstName = document.getElementById("input-first-name").value;
             var lastName = document.getElementById("input-last-name").value;
             var phoneNumber = document.getElementById("input-mobile-number").value;
-            let data = {firstName: firstName, lastName: lastName, phoneNumber: phoneNumber}
+            var age = document.getElementById("input-age").value;
+            var e = document.getElementById('gender-selection');
+            var gender = e.options[e.selectedIndex].text;
+            var r = document.getElementById('role-selection');
+            var role = r.options[r.selectedIndex].text;
+            if(role == "Lab Operator"){
+                role = "Labop";
+            }
+            var d = document.getElementById('department-selection');
+            var department = d.options[d.selectedIndex].text;
+            let data = {firstName: firstName, lastName: lastName, phoneNumber: phoneNumber, age: age, gender: gender, department: department, role: role}
             $.ajax({
                     type: "PATCH",
-                    url: "{{ url_for('update') }}",
+                    url: "{{ url_for('update') }}?id="+localStorage["staffID"],
                     data: JSON.stringify(data),
                     success: function(result) {
                         alert('Info updated successfully');
