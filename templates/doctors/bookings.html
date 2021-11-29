@@ -71,10 +71,23 @@
             padding: 15px;
         }
 
+        .upload-btn {
+            background: orange;
+            font-size: medium;
+            margin-bottom: 0px;
+            margin-top: 0px;
+            max-height: 45px;
+            padding-top: 5px;
+        }
+
         .styled-table th,
         .styled-table td {
             padding: 12px 45px;
         }
+
+        span {
+  font-size: 30px;
+}
     </style>
 </head>
 
@@ -116,9 +129,9 @@ $(document).ready(function() {
               column2 = "<td><p style=\"width:120%;\"><b>Name:</b> "+capitalizeFirstLetter(obj.patient.firstName)+" "+capitalizeFirstLetter(obj.patient.lastName)+"</p>";
                 column3 = "<p style=\"width:120%;\"><b>Email:</b> "+obj.patient.email+"</p>";
                 column4 = "<p style=\"width:120%;\"><b>Phone:</b> "+obj.patient.phoneNumber+"</p></td>\n";
-              var status = "Uploaded";
+              var status = "<span>&#9989;</span>";
               if(!obj.appointment.prescription){
-                  status = "Not Uploaded";
+                  status = "<button type=\"button\" class=\"upload-btn\" onclick=uploadPrescription(\""+obj.patient.id+"\",\""+obj.appointment.id+"\")>Upload</button>";
               }
               column5 = "<td>"+status+"</td>\n</tr>\n";
               row = column1+column2+column3+column4+column5;
@@ -148,7 +161,11 @@ $(document).ready(function() {
                     return string.charAt(0).toUpperCase() + string.slice(1);
                 }
     });
-
+    function uploadPrescription(patientID, appID) {
+        localStorage["patientID"] = patientID;
+        localStorage["appID"] = appID;
+            location.href = "{{ url_for('prescription') }}";
+        }
         function goBack() {
             window.history.back();
         }

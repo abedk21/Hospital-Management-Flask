@@ -173,7 +173,7 @@
         </div>
         
         <div class="app-btn">
-            <a href="{{ url_for('prescription') }}">Upload Documents</a>
+            <a onclick="MyFunction()" href="#">Upload Documents</a>
         </div>
     </div>
 
@@ -192,8 +192,15 @@
     </div>
 
 
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <script type="text/JavaScript">
 
+function MyFunction() {
+    localStorage.clear();
+    window.location.href = "{{ url_for('prescription') }}";
+}
 
+    </script>
 </body>
 
 </html>

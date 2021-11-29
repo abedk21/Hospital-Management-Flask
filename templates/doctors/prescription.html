@@ -194,14 +194,43 @@ $(document).ready(function() {
             }              
             });
             document.getElementById("patient-selection").innerHTML = optionList;
+            if (localStorage.getItem("patientID") != null) {
+            var textToFind = localStorage["patientID"];
+            var dd = document.getElementById("patient-selection")
+            //$('#patient-selection').val(localStorage["patientID"]).trigger('change');
+            for (var i = 0; i < dd.options.length; i++) {
+                if (dd.options[i].value === textToFind) {
+                    dd.selectedIndex = i;
+                    break;
+                }
+            }
+            document.getElementById("app-selection").innerHTML = "";
+            var optionList = "<option value=\"\" selected disabled hidden>Choose Appointment</option>";
+            var patientID = document.getElementById('patient-selection').value;
+            $.each(appointments, function(idx, obj) {
+                if(obj.appointment.patientID == patientID && !obj.appointment.prescription) {
+              optionList += "<option value=\""+obj.appointment.id+"\">"+timeConverter(obj.appointment.date)+" ("+obj.appointment.timeSlot+")</option>";
+               }
+                  });
+            document.getElementById("app-selection").innerHTML = optionList;
+            dd = document.getElementById("app-selection");
+            for (var i = 0; i < dd.options.length; i++) {
+                if (dd.options[i].value === localStorage["appID"]) {
+                    dd.selectedIndex = i;
+                    break;
+                }
+            }
+            }
 
                     },
                     error: function(result) {
                         alert('error');
                     }
                 });
-    });
 
+
+    });
+    
     document.getElementById('patient-selection').addEventListener('change', function() { 
     document.getElementById("app-selection").innerHTML = "";
             var optionList = "<option value=\"\" selected disabled hidden>Choose Appointment</option>";

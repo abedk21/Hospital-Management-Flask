@@ -87,10 +87,6 @@ def register():
         
         user = User(**newBody).save()
         return redirect(url_for('login'))
-        # headers = {'Content-Type': 'text/html'}
-        # return make_response(render_template('login.html'),200,headers)
-        # id = user.id
-        # return {'id': str(id), 'msg': "Account successfully created"}, 200
     headers = {'Content-Type': 'text/html'}
     return make_response(render_template('signup.html'),200,headers)
 
@@ -236,7 +232,6 @@ def prescription():
     if request.method == 'GET':
         headers = {'Content-Type': 'text/html'}
         return make_response(render_template('doctors/prescription.html'),200,headers)
-
     if request.method == 'POST':
         # print("request: ",request.get_json(force=True))
         file = request.files['file']
@@ -342,7 +337,6 @@ def medicaltest():
         if current_user.role == "Labop":
             headers = {'Content-Type': 'text/html'}
             return make_response(render_template('tech/medtest.html'),200,headers)
-
     if request.method == 'POST':
         file = request.files['file']
         patientID = request.form['patientID']
