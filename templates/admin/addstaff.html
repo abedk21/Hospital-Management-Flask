@@ -2117,12 +2117,14 @@
                                 <div class="form-group">
                                     <label class="form-control-label" for="input-email">Email address</label>
                                     <input type="email" id="input-email" class="form-control form-control-alternative">
+                                    <div class='msg-error' id='email-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter email</div>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label class="form-control-label" for="input-password">Password</label>
                                     <input type="password" id="input-password" class="form-control form-control-alternative">
+                                    <div class='msg-error' id='password-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter password</div>
                                 </div>
                             </div>
                         </div>
@@ -2132,6 +2134,7 @@
                                     <label class="form-control-label" for="input-first-name">First name</label>
                                     <input type="text" id="input-first-name"
                                         class="form-control form-control-alternative">
+                                        <div class='msg-error' id='firstname-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter first name</div>
                                 </div>
                             </div>
                             <div class="col-lg-6">
@@ -2139,6 +2142,7 @@
                                     <label class="form-control-label" for="input-last-name">Last name</label>
                                     <input type="text" id="input-last-name"
                                         class="form-control form-control-alternative">
+                                        <div class='msg-error' id='lastname-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter last name</div>
                                 </div>
                             </div>
 
@@ -2147,6 +2151,7 @@
                                     <label class="form-control-label" for="input-mobile-number">Mobile Number</label>
                                     <input type="number" id="input-mobile-number"
                                         class="form-control form-control-alternative">
+                                        <div class='msg-error' id='phone-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter phone number</div>
                                 </div>
                             </div>
 
@@ -2155,6 +2160,7 @@
                                     <label class="form-control-label" for="input-age">Age</label>
                                     <input type="number" id="input-age"
                                         class="form-control form-control-alternative">
+                                        <div class='msg-error' id='age-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter age</div>
                                 </div>
                             </div>
 
@@ -2162,10 +2168,11 @@
                                 <div class="form-group focused">
                                         <label class="form-control-label" for="gender-selection">Gender</label>
                                         <select class="form-control form-control-alternative" id="gender-selection">
-                                          <option value="" selected disabled hidden>Choose Gender</option>
+                                          <option value="0" selected disabled hidden>Choose Gender</option>
                                           <option value="">Male</option>
                                           <option value="">Female</option>
                                         </select>
+                                        <div class='msg-error' id='gender-error' style='color:red;margin-bottom: 10px;display:none;'>Please select gender</div>
                                     </div>
                             </div>
                         </div>
@@ -2175,18 +2182,20 @@
                                 <div class="form-group focused">
                                         <label class="form-control-label" for="role-selection">Role</label>
                                         <select class="form-control form-control-alternative" id="role-selection">
-                                          <option value="" selected disabled hidden>Choose Role</option>
+                                          <option value="0" selected disabled hidden>Choose Role</option>
                                           <option value="">Doctor</option>
                                           <option value="">Lab Operator</option>
                                         </select>
+                                        <div class='msg-error' id='role-error' style='color:red;margin-bottom: 10px;display:none;'>Please select role</div>
                                     </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group focused">
                                         <label class="form-control-label" for="department-selection">Department</label>
                                         <select class="form-control form-control-alternative" id="department-selection">
-                                          <option value="" selected disabled hidden>Choose Department</option>
+                                          <option value="0" selected disabled hidden>Choose Department</option>
                                         </select>
+                                        <div class='msg-error' id='department-error' style='color:red;margin-bottom: 10px;display:none;'>Please select department</div>
                                     </div>
                             </div>
                         </div>
@@ -2300,6 +2309,90 @@
             }
             var d = document.getElementById('department-selection');
             var department = d.options[d.selectedIndex].text;
+            var complete = true;
+    var focusSet = false;
+    if(!(firstName.length))
+     {
+        document.getElementById('firstname-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("input-first-name").focus();
+        complete = false;
+     } else{
+      document.getElementById('firstname-error').style.display = 'none';
+     }
+     if(!(lastName.length))
+     {
+        document.getElementById('lastname-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("input-last-name").focus();
+        complete = false;
+     } else{
+      document.getElementById('lastname-error').style.display = 'none';
+     }
+     if((e.value == "0"))
+     {
+        document.getElementById('gender-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("gender-selection").focus();
+        complete = false;
+     } else{
+      document.getElementById('gender-error').style.display = 'none';
+     }
+     if(!(age.length))
+     {
+        document.getElementById('age-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("input-age").focus();
+        complete = false;
+     } else{
+      document.getElementById('age-error').style.display = 'none';
+     }
+     if(!(phoneNumber.length))
+     {
+        document.getElementById('phone-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("input-mobile-number").focus();
+        complete = false;
+     } else{
+      document.getElementById('phone-error').style.display = 'none';
+     }
+    if(!(email.length))
+     {
+        document.getElementById('email-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("input-email").focus();
+        complete = false;
+     } else{
+      document.getElementById('email-error').style.display = 'none';
+     }
+     if(!(password.length))
+     {
+        document.getElementById('password-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("input-password").focus();
+        complete = false;
+     } else{
+      document.getElementById('password-error').style.display = 'none';
+     }
+     if((r.value == "0"))
+     {
+        document.getElementById('role-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("role-selection").focus();
+        complete = false;
+     } else{
+      document.getElementById('role-error').style.display = 'none';
+     }
+     if((d.value == "0"))
+     {
+        document.getElementById('department-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("department-selection").focus();
+        complete = false;
+     } else{
+      document.getElementById('department-error').style.display = 'none';
+     }
+      if (complete) {
             let data = {email: email, password: password, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber, age: age, gender: gender, department: department, role: role}
             $.ajax({
                     type: "POST",
@@ -2312,6 +2405,7 @@
                         alert('error');
                     }
                 });
+            }
         });
 
         function goBack() {

@@ -153,14 +153,15 @@
           <div class="elem-group">
             <label for="test-selection">Select Test Type</label>
             <select id="test-selection" name="room_preference" required>
-              <option value="" selected disabled hidden>Choose Test Type</option>
+              <option value="0" selected disabled hidden>Choose Test Type</option>
             </select>
           </div>    
           <div class="elem-group">
             <label for="labop-selection">Select Lab Operator</label>
             <select id="labop-selection" name="room_preference" required>
-              <option value="" selected disabled hidden>Choose Lab Operator</option>
+              <option value="0" selected disabled hidden>Choose Lab Operator</option>
             </select>
+            <div class='msg-error' id='labop-error' style='color:red;margin-bottom: 10px;display:none;'>Please select lab operator</div>
           </div>
     
     
@@ -168,13 +169,15 @@
           <div class="elem-group inlined">
             <label for="checkin-date">Select Date</label>
             <input type="date" id="checkin-date" name="checkin" required>
+            <div class='msg-error' id='date-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter date</div>
           </div>
     
           <div class="elem-group">
             <label for="time-selection">Select Time</label>
             <select id="time-selection" name="time_preference" required>
-              <option value="" selected disabled hidden>Choose Time Slot</option>
+              <option value="0" selected disabled hidden>Choose Time Slot</option>
             </select>
+            <div class='msg-error' id='time-error' style='color:red;margin-bottom: 10px;display:none;'>Please select time slot</div>
           </div>
     
           <div class="elem-group">
@@ -201,7 +204,7 @@
                         //data: JSON.stringify(data),
                         success: function(result) {
                           document.getElementById("test-selection").innerHTML = "";
-                var optionList = "<option value=\"\" selected disabled hidden>Choose Test Type</option>";
+                var optionList = "<option value=\"0\" selected disabled hidden>Choose Test Type</option>";
                 $.each(result, function(idx, obj) {
                   optionList += "<option value=\"\">"+capitalizeFirstLetter(obj.testtype)+"</option>";
                       });
@@ -254,7 +257,7 @@
         var booked = [];
       document.getElementById('labop-selection').addEventListener('change', function() {
         var labopID = document.getElementById('labop-selection').value;
-        var optionList = "<option value=\"\" selected disabled hidden>Choose Time Slot</option>";
+        var optionList = "<option value=\"0\" selected disabled hidden>Choose Time Slot</option>";
         var date = document.getElementById('checkin-date').value+"T00:00:00";
         booked.splice(0, booked.length);
                 $.each(appointments, function(idx, obj) {
@@ -271,7 +274,7 @@
                     }
                 });
                 if(booked.length == 7) {
-                  optionList = "<option value=\"\">No Available Time Slots</option>";
+                  optionList = "<option value=\"none\">No Available Time Slots</option>";
                 }
                 document.getElementById("time-selection").innerHTML = optionList;
     
@@ -295,7 +298,7 @@
     
       document.getElementById('checkin-date').addEventListener('change', function() {
         var labopID = document.getElementById('labop-selection').value;
-        var optionList = "<option value=\"\" selected disabled hidden>Choose Time Slot</option>";
+        var optionList = "<option value=\"0\" selected disabled hidden>Choose Time Slot</option>";
         var date = document.getElementById('checkin-date').value+"T00:00:00";
         booked.splice(0, booked.length);
                 $.each(appointments, function(idx, obj) {
@@ -312,7 +315,7 @@
                     }
                 });
                 if(booked.length == 7) {
-                  optionList = "<option value=\"\">No Available Time Slots</option>";
+                  optionList = "<option value=\"none\">No Available Time Slots</option>";
                 }
                 document.getElementById("time-selection").innerHTML = optionList;
     
@@ -334,10 +337,41 @@
             $(submitbutton).on("click", function(e) {
                 e.preventDefault();
                 var labopID = String(document.getElementById("labop-selection").value);
-                var e = document.getElementById("time-selection");
-                var timeSlot = e.options[e.selectedIndex].text;
+                var t = document.getElementById("time-selection");
+                var timeSlot = t.options[t.selectedIndex].text;
                 var date = document.getElementById("checkin-date").value;
                 var note = String(document.getElementById("message").value);
+                var complete = true;
+    var focusSet = false;
+    if(labopID == "0" || labopID == "none")
+     {
+        document.getElementById('labop-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById('labop-selection').focus();
+        complete = false;
+     } else{
+      document.getElementById('labop-error').style.display = 'none';
+     }
+     if(date == "")
+     {
+        document.getElementById('date-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("date-selection").focus();
+        complete = false;
+     } else{
+      document.getElementById('date-error').style.display = 'none';
+     }
+     if((t.value == "0" || t.value == "none"))
+     {
+        document.getElementById('time-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("time-selection").focus();
+        complete = false;
+     } else{
+      document.getElementById('time-error').style.display = 'none';
+     }
+
+      if (complete) {
                 let data = {labopID: labopID, timeSlot: timeSlot, date: date+"T00:00:00", note: note}
                 $.ajax({
                         type: "POST",
@@ -351,6 +385,7 @@
                             alert('error');
                         }
                     });
+                  }
             });
     
             function goBack() {

@@ -152,14 +152,16 @@
       <div class="elem-group">
         <label for="department-selection">Select Department</label>
         <select id="department-selection" name="room_preference">
-          <option value="" selected disabled hidden>Choose Department</option>
+          <option value="0" selected disabled hidden>Choose Department</option>
         </select>
+        <div class='msg-error' id='department-error' style='color:red;margin-bottom: 10px;display:none;'>Please select department</div>
       </div>
       <div class="elem-group">
         <label for="doctor-selection">Select Doctor</label>
         <select id="doctor-selection" name="room_preference">
-          <option value="" selected disabled hidden>Choose Doctor</option>
+          <option value="0" selected disabled hidden>Choose Doctor</option>
         </select>
+        <div class='msg-error' id='doctor-error' style='color:red;margin-bottom: 10px;display:none;'>Please select doctor</div>
       </div>
 
 
@@ -168,12 +170,14 @@
         <label for="checkin-date">Select Date</label>
         <input type="date" id="checkin-date" name="checkin">
       </div>
+      <div class='msg-error' id='date-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter date</div>
 
       <div class="elem-group">
         <label for="time-selection">Select Time</label>
         <select id="time-selection" name="time_preference">
-          <option value="" selected disabled hidden>Choose Time Slot</option>
+          <option value="0" selected disabled hidden>Choose Time Slot</option>
         </select>
+        <div class='msg-error' id='time-error' style='color:red;margin-bottom: 10px;display:none;'>Please select time slot</div>
       </div>
 
       <div class="elem-group">
@@ -253,7 +257,7 @@ $(document).ready(function() {
     var booked = [];
   document.getElementById('doctor-selection').addEventListener('change', function() {
     var doctorID = document.getElementById('doctor-selection').value;
-    var optionList = "<option value=\"\" selected disabled hidden>Choose Time Slot</option>";
+    var optionList = "<option value=\"0\" selected disabled hidden>Choose Time Slot</option>";
     var date = document.getElementById('checkin-date').value+"T00:00:00";
     booked.splice(0, booked.length);
             $.each(appointments, function(idx, obj) {
@@ -270,7 +274,7 @@ $(document).ready(function() {
                 }
             });
             if(booked.length == 7) {
-              optionList = "<option value=\"\">No Available Time Slots</option>";
+              optionList = "<option value=\"none\">No Available Time Slots</option>";
             }
             document.getElementById("time-selection").innerHTML = optionList;
 
@@ -290,7 +294,7 @@ $(document).ready(function() {
 
   document.getElementById('checkin-date').addEventListener('change', function() {
     var doctorID = document.getElementById('doctor-selection').value;
-    var optionList = "<option value=\"\" selected disabled hidden>Choose Time Slot</option>";
+    var optionList = "<option value=\"0\" selected disabled hidden>Choose Time Slot</option>";
     var date = document.getElementById('checkin-date').value+"T00:00:00";
     booked.splice(0, booked.length);
             $.each(appointments, function(idx, obj) {
@@ -307,7 +311,7 @@ $(document).ready(function() {
                 }
             });
             if(booked.length == 7) {
-              optionList = "<option value=\"\">No Available Time Slots</option>";
+              optionList = "<option value=\"none\">No Available Time Slots</option>";
             }
             document.getElementById("time-selection").innerHTML = optionList;
 
@@ -334,10 +338,41 @@ $(document).ready(function() {
         $(submitbutton).on("click", function(e) {
             e.preventDefault();
             var doctorID = String(document.getElementById("doctor-selection").value);
-            var e = document.getElementById("time-selection");
-            var timeSlot = e.options[e.selectedIndex].text;
+            var t = document.getElementById("time-selection");
+            var timeSlot = t.options[t.selectedIndex].text;
             var date = document.getElementById("checkin-date").value;
             var note = String(document.getElementById("message").value);
+            var complete = true;
+    var focusSet = false;
+    if(doctorID == "0" || doctorID == "none")
+     {
+        document.getElementById('doctor-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById('doctor-selection').focus();
+        complete = false;
+     } else{
+      document.getElementById('doctor-error').style.display = 'none';
+     }
+     if(date == "")
+     {
+        document.getElementById('date-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("date-selection").focus();
+        complete = false;
+     } else{
+      document.getElementById('date-error').style.display = 'none';
+     }
+     if((t.value == "0" || t.value == "none"))
+     {
+        document.getElementById('time-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("time-selection").focus();
+        complete = false;
+     } else{
+      document.getElementById('time-error').style.display = 'none';
+     }
+
+      if (complete) {
             let data = {doctorID: doctorID, timeSlot: timeSlot, date: date+"T00:00:00", note: note}
             $.ajax({
                     type: "POST",
@@ -351,6 +386,7 @@ $(document).ready(function() {
                         alert('error');
                     }
                 });
+              }
         });
 
         function goBack() {

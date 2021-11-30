@@ -152,19 +152,21 @@
           <div class="elem-group">
             <label for="patient-selection">Patient</label>
             <select id="patient-selection" name="select_patient" required>
-              <option value="" selected disabled hidden>Choose Patient</option>
+              <option value="0" selected disabled hidden>Choose Patient</option>
             </select>
+            <div class='msg-error' id='patient-error' style='color:red;margin-bottom: 10px;display:none;'>Please select patient</div>
           </div> 
 
           <div class="elem-group">
             <label for="app-selection">Appointment</label>
             <select id="app-selection" name="select_app" required>
-              <option value="" selected disabled hidden>Choose Appointment</option>
+              <option value="0" selected disabled hidden>Choose Appointment</option>
             </select>
+            <div class='msg-error' id='app-error' style='color:red;margin-bottom: 10px;display:none;'>Please select appointment</div>
           </div> 
             <label for="file">Choose file to upload</label>
           <input type="file" id="myFile" name="filename">
-    
+          <div class='msg-error' id='file-error' style='color:red;margin-bottom: 10px;display:none;'>No file added</div>
           <button id="submit-btn" type="submit">Upload</button>
         </form>
     
@@ -269,6 +271,37 @@ $(document).ready(function() {
             var fd = new FormData();
             var files = $('#myFile')[0].files;
             //var file = document.getElementById("myFile").files[0];
+            var complete = true;
+    var focusSet = false;
+    if(patientID == "0" || patientID == "")
+     {
+        document.getElementById('patient-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById('patient-selection').focus();
+        complete = false;
+     } else{
+      document.getElementById('patient-error').style.display = 'none';
+     }
+     if(appID == "0")
+     {
+        document.getElementById('app-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("app-selection").focus();
+        complete = false;
+     } else{
+      document.getElementById('app-error').style.display = 'none';
+     }
+     if(document.getElementById("myFile").value == "")
+     {
+        document.getElementById('file-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("myFile").focus();
+        complete = false;
+     } else{
+      document.getElementById('file-error').style.display = 'none';
+     }
+
+      if (complete) {
             fd.append('patientID',patientID);
             fd.append('appID',appID);
             fd.append('file',files[0]);
@@ -287,6 +320,7 @@ $(document).ready(function() {
                         alert('error');
                     }
                 });
+              }
         });
 
         function goBack() {

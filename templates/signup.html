@@ -65,7 +65,7 @@
 
                 <div class="form-outline form-white mb-4 pt-1 pb-3" for="inlineFormCustomSelectPref">
                   <select class="form-control form-control-lg" id="inlineFormCustomSelectPref">
-                    <option selected disabled hidden>Choose Gender</option>
+                    <option value="0" selected disabled hidden>Choose Gender</option>
                     <option value="1">Male</option>
                     <option value="2">Female</option>
                   </select>
@@ -122,13 +122,14 @@
       var g = document.getElementById("inlineFormCustomSelectPref");
       var gender = g.options[g.selectedIndex].text;
       var role = "Patient";
-
+      var complete = true;
     var focusSet = false;
     if(!(firstName.length))
      {
         document.getElementById('firstname-error').style.display = 'block';
         event.preventDefault();
         document.getElementById("firstName").focus();
+        complete = false;
      } else{
       document.getElementById('firstname-error').style.display = 'none';
      }
@@ -137,14 +138,16 @@
         document.getElementById('lastname-error').style.display = 'block';
         event.preventDefault();
         document.getElementById("lastName").focus();
+        complete = false;
      } else{
       document.getElementById('lastname-error').style.display = 'none';
      }
-     if((gender != "Male" || gender != "Female"))
+     if((g.value == "0"))
      {
         document.getElementById('gender-error').style.display = 'block';
         event.preventDefault();
         document.getElementById("inlineFormCustomSelectPref").focus();
+        complete = false;
      } else{
       document.getElementById('gender-error').style.display = 'none';
      }
@@ -153,6 +156,7 @@
         document.getElementById('age-error').style.display = 'block';
         event.preventDefault();
         document.getElementById("typeAgeX").focus();
+        complete = false;
      } else{
       document.getElementById('age-error').style.display = 'none';
      }
@@ -161,6 +165,7 @@
         document.getElementById('phone-error').style.display = 'block';
         event.preventDefault();
         document.getElementById("typePhoneX").focus();
+        complete = false;
      } else{
       document.getElementById('phone-error').style.display = 'none';
      }
@@ -169,6 +174,7 @@
         document.getElementById('email-error').style.display = 'block';
         event.preventDefault();
         document.getElementById("typeEmailX").focus();
+        complete = false;
      } else{
       document.getElementById('email-error').style.display = 'none';
      }
@@ -177,11 +183,12 @@
         document.getElementById('password-error').style.display = 'block';
         event.preventDefault();
         document.getElementById("typePasswordX").focus();
+        complete = false;
      } else{
       document.getElementById('password-error').style.display = 'none';
      }
 
-      if (email != "" && password != "" && firstName != "" && lastName != "" && phoneNumber != "" && age > 0 && (gender == "Male" || gender == "Female")) {
+      if (complete) {
       let data = { email: email, password: password, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber, age: age, gender: gender, role: role };
       try {
         const response = await fetch("{{ url_for('register') }}", {

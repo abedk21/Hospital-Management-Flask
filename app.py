@@ -59,6 +59,10 @@ def index():
 def contact():
     return render_template("contact_us.html")
 
+@app.route("/passreset")
+def passreset():
+    return render_template("passreset.html")
+
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
