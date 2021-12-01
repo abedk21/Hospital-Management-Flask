@@ -76,24 +76,37 @@
                   <input type="number" name="age" id="typeAgeX" class="form-control form-control-lg"
                     placeholder="Age" />
                     <div class='msg-error' id='age-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter age</div>
+                    <div class='msg-error' id='age2-error' style='color:red;margin-bottom: 10px;display:none;'>Age is invalid</div>
+                    <div class='msg-error' id='age3-error' style='color:red;margin-bottom: 10px;display:none;'>You must be at least 18</div>
                 </div>
 
                 <div class="form-outline form-white mb-4 pt-1 pb-3">
                   <input type="text" name="phone" id="typePhoneX" class="form-control form-control-lg"
                     placeholder="Phone Number" />
                     <div class='msg-error' id='phone-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter phone number</div>
+                    <div class='msg-error' id='phone2-error' style='color:red;margin-bottom: 10px;display:none;'>Phone number is invalid</div>
+
                 </div>
 
                 <div class="form-outline form-white mb-4 pt-1 pb-3">
                   <input type="email" name="email" id="typeEmailX" class="form-control form-control-lg"
                     placeholder="Email" />   
-                    <div class='msg-error' id='email-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter email</div>                
+                    <div class='msg-error' id='email-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter email</div>
+                    <div class='msg-error' id='email2-error' style='color:red;margin-bottom: 10px;display:none;'>Email is invalid</div>                               
                 </div>
 
                 <div class="form-outline form-white mb-4 pt-1 pb-3">
                   <input type="password" id="typePasswordX" class="form-control form-control-lg"
                     placeholder="Password" />
                     <div class='msg-error' id='password-error' style='color:red;margin-bottom: 10px;display:none;'>Please enter password</div>
+                    <div class='msg-error' id='password1-error' style='color:red;margin-bottom: 10px;display:none;'>Password must be 8 to 15 characters which contain at least one lowercase letter, one uppercase letter, one numeric digit, and one special character</div>
+                </div>
+
+                <div class="form-outline form-white mb-4 pt-1 pb-3">
+                  <input type="password" id="typePassword2X" class="form-control form-control-lg"
+                    placeholder="Confirm Password" />
+                    <div class='msg-error' id='password2-error' style='color:red;margin-bottom: 10px;display:none;'>Please Confirm password</div>
+                    <div class='msg-error' id='password3-error' style='color:red;margin-bottom: 10px;display:none;'>Passwords don't match</div>
                 </div>
 
                 <button id="register-btn" class="btn btn-outline-light btn-lg px-5 mb-1" type="submit">Sign Up</button>
@@ -115,6 +128,7 @@
     button.addEventListener('click', async _ => {
       var email = document.getElementById("typeEmailX").value;
       var password = document.getElementById("typePasswordX").value;
+      var password2 = document.getElementById("typePassword2X").value;
       var firstName = document.getElementById("firstName").value;
       var lastName = document.getElementById("lastName").value;
       var phoneNumber = document.getElementById("typePhoneX").value;
@@ -151,7 +165,7 @@
      } else{
       document.getElementById('gender-error').style.display = 'none';
      }
-     if(!(age.length))
+     if(age=="")
      {
         document.getElementById('age-error').style.display = 'block';
         event.preventDefault();
@@ -159,6 +173,22 @@
         complete = false;
      } else{
       document.getElementById('age-error').style.display = 'none';
+      if(!agematch(age)){
+        document.getElementById('age2-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("typeAgeX").focus();
+        complete = false;
+      } else {
+        document.getElementById('age2-error').style.display = 'none';
+        if(parseInt(age) < 18) {
+          document.getElementById('age3-error').style.display = 'block';
+          event.preventDefault();
+          document.getElementById("typeAgeX").focus();
+          complete = false;
+        } else{
+          document.getElementById('age3-error').style.display = 'none';
+        }
+      }
      }
      if(!(phoneNumber.length))
      {
@@ -168,6 +198,14 @@
         complete = false;
      } else{
       document.getElementById('phone-error').style.display = 'none';
+      if(!phonenumber(phoneNumber)){
+        document.getElementById('phone2-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("typePhoneX").focus();
+        complete = false;
+      } else {
+        document.getElementById('phone2-error').style.display = 'none';
+      }
      }
     if(!(email.length))
      {
@@ -177,6 +215,14 @@
         complete = false;
      } else{
       document.getElementById('email-error').style.display = 'none';
+      if (!ValidateEmail(email)) {
+        document.getElementById('email2-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("typeEmailX").focus();
+        complete = false;
+      } else {
+        document.getElementById('email2-error').style.display = 'none';
+      }
      }
      if(!(password.length))
      {
@@ -186,6 +232,32 @@
         complete = false;
      } else{
       document.getElementById('password-error').style.display = 'none';
+     }
+     if(!(password2.length))
+     {
+        document.getElementById('password2-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("typePassword2X").focus();
+        complete = false;
+     } else{
+      document.getElementById('password2-error').style.display = 'none';
+      if (!CheckPassword(password)){
+          document.getElementById('password1-error').style.display = 'block';
+          event.preventDefault();
+          document.getElementById("typePasswordX").focus();
+          complete = false;         
+      } else {
+        document.getElementById('password1-error').style.display = 'none';
+      }
+      if (password != password2){
+        document.getElementById('password3-error').style.display = 'block';
+        event.preventDefault();
+        document.getElementById("typePassword2X").focus();
+        complete = false;
+      } else {
+        
+        document.getElementById('password3-error').style.display = 'none';
+      }
      }
 
       if (complete) {
@@ -211,6 +283,64 @@
       }
     }
     });
+
+    function CheckPassword(inputtxt) 
+{ 
+var decimal=  /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+if(inputtxt.match(decimal)) 
+{ 
+//alert('Correct, try another...')
+return true;
+}
+else
+{ 
+//alert('Wrong...!')
+return false;
+}
+}
+
+function ValidateEmail(inputText)
+{
+var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+if(inputText.match(mailformat))
+{
+//alert("You have entered a valid email address!");    //The pop up alert for a valid email address
+//document.form1.text1.focus();
+return true;
+}
+else
+{
+//alert("You have entered an invalid email address!");    //The pop up alert for an invalid email address
+//document.form1.text1.focus();
+return false;
+}
+}
+
+function phonenumber(inputtxt)
+{
+  var phoneno = /^\d{10}$/;
+  if((inputtxt.match(phoneno))) {
+      return true;
+        }
+      else
+        {
+        //alert("message");
+        return false;
+        }
+}
+
+function agematch(inputtxt)
+{
+  var a = /^[1-9]?[0-9]{1}$|^100$/;
+  if((inputtxt.match(a))) {
+      return true;
+        }
+      else
+        {
+        //alert("message");
+        return false;
+        }
+}
   
         function goBack() {
           window.location.href = "{{ url_for('index') }}";
